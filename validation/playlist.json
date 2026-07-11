@@ -1,0 +1,16 @@
+{
+  "segments": [
+    {
+      "url": "audio/segments/track_001.mp3",
+      "start": 1720684800,
+      "end": 1720695600,
+      "title": "No Agenda Stream - Segment 1"
+    },
+    {
+      "url": "audio/segments/track_002.mp3",
+      "start": 1720695600,
+      "end": 1720706400,
+      "title": "No Agenda Stream - Segment 2"
+    }
+  ]
+}

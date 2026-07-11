@@ -1,0 +1,62 @@
+# No Agenda Time Machine - Git Ignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+ENV/
+
+# Audio segments (runtime generated)
+validation/segments/
+validation/production/audio/segments/
+test_validation/audio/segments/
+segments/
+
+# Playlist JSON (runtime generated, but keep example)
+validation/playlist.json
+test_validation/playlist.json
+!validation/production/playlist.json.example
+
+# Screen logs
+screenlog.*
+
+# Test results
+TestResults/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Memory files (persistent Claude memory)
+.claude/memory/
+
+# Session/temp files
+*.tmp
+*.bak
+.no-agenda-time-machine/
+
+# Claude Code session files
+.claude/session/
+.claude/tmp/
+
+# Unix
+*.log
+*.pid

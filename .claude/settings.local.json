@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/^HTML_TEMPLATE = \"\"\"/,/^\"\"\"$/{print}' /home/jeff/ClaudeCode/noAgendaTimeMachine/noAgendaTimeMachine.py)",
+      "Bash(sed '1d;$d')",
+      "Read(//tmp/natm_test/**)",
+      "Bash(cat)",
+      "Bash(chmod +x /home/jeff/.claude/statusline.sh)",
+      "Bash(/home/jeff/.claude/statusline.sh)",
+      "Bash(python3 *)",
+      "Bash(git -C /home/jeff/ClaudeCode/noAgendaTimeMachine/validation add docs/2025-07-04-no-agenda-time-machine-production-design.md)",
+      "Bash(git -C /home/jeff/ClaudeCode/noAgendaTimeMachine/validation commit -m 'Add Phase 1: Production Architecture Design *)",
+      "Bash(git -C /home/jeff/ClaudeCode/noAgendaTimeMachine/validation commit -m 'Update architecture: systemd → screen *)",
+      "Bash(screen -S noAgendaTimeMachine -X quit)",
+      "Bash(screen -list)",
+      "Bash(git *)"
+    ]
+  }
+}

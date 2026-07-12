@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SESSION_NAME="noagendarecorder"
-PYTHON_SCRIPT="$SCRIPT_DIR/noAgendaTimeMachine.py"
+PYTHON_SCRIPT="$SCRIPT_DIR/recorderd.py"
 
 # Colors for output
 RED='\033[0;31m'

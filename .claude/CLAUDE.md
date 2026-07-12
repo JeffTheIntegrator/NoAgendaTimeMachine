@@ -7,57 +7,65 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 NoAgendaTimeMachine is a Python-based DVR for the No Agenda stream. It continuously records an ICY audio stream, splits it into MP3 segments based on metadata changes (StreamTitle), and provides a static HTML player for time-shifted playback.
 
 **Architecture:**
-- **Python recorder** (`recorderd.py` / `noAgendaTimeMachine.py`): Captures stream, writes MP3 segments with JSON metadata sidecars, updates `playlist.json`
+- **Python recorder** (`recorderd.py`): Captures stream, writes MP3 segments with JSON metadata sidecars, updates `playlist.json`
 - **HTML player** (`index.html`): Static file with embedded JavaScript, dual-buffer audio player (playerA/playerB), fetches playlist.json and sidecar metadata
 - **Screen launcher** (`start.sh`): Manages recorder in detached screen session
 - **Live edge handling**: Dynamic reloading at the stream's leading edge with fixed 30s offset
 
-**Current Version:** v1.3.0 (Complete) - Released 2026-07-11
-**Project Status:** ✅ All bugs fixed and validated, All 12 features complete - v1.3.0 released
+**Current Version:** v1.4.0 (Feature 13 + Simplification) - Released 2026-07-12
+**Project Status:** ✅ All bugs fixed, Feature 13 complete, File copies simplified - v1.4.0 released
 
 ## Project Structure
 
 ```
 noAgendaTimeMachine/
-├── .claude/
+├── .agent/
 │   └── CLAUDE.md (this file)
-├── release/                       # Release packages
+├── release/                       # Release packages (frozen artifacts)
 │   ├── v1.1.0/                   # Light theme release
 │   ├── v1.2.0/                   # UI improvements
-│   ├── v1.3.0/                   # Current release - All 12 features
-│   │   ├── index.html             # Full feature set
-│   │   ├── RELEASE_v1.3.0.md     # Release notes
+│   ├── v1.3.0/                   # 12 features complete
+│   ├── v1.4.0/                   # Current - Feature 13 + simplification
+│   │   ├── index.html
+│   │   ├── RELEASE_v1.4.0.md
 │   │   └── audio/
 │   │       ├── recorderd.py
 │   │       ├── start.sh
 │   │       └── segments/
-├── validation/                    # Production-ready implementation
+├── validation/                    # Development & deployment source
 │   ├── docs/
 │   │   └── 2025-07-04-no-agenda-time-machine-production-design.md
-│   ├── production/                # Deployment package (source for releases)
-│   │   ├── index.html
+│   ├── production/                # CANONICAL SOURCE (source for releases)
+│   │   ├── index.html             # THE frontend file - edit here
 │   │   └── audio/
-│   │       ├── recorderd.py
-│   │       ├── start.sh
+│   │       ├── recorderd.py       # THE recorder - edit here
+│   │       ├── start.sh           # THE launcher - edit here
 │   │       └── segments/
 │   ├── TESTING.md                 # Testing & validation report
-│   ├── test_local.sh              # Local test wrapper
-│   ├── index.html
-│   ├── noAgendaTimeMachine.py
-│   ├── playlist.json              # Test data
-│   └── start.sh
+│   └── playlist.json              # (removed - was duplicate test data)
 ├── test_validation/               # Playwright browser tests
-│   ├── index.html
+│   ├── index.html -> ../validation/production/index.html (symlink)
+│   ├── audio/
+│   │   └── playlist.json         # test data
 │   └── tests/
-│       ├── feature2.spec.js
-│       ├── feature6.spec.js
-│       ├── feature8.spec.js
-│       ├── feature9.spec.js
-│       ├── feature10.spec.js
-│       └── bug3.spec.js
-├── TODO.md                        # Feature requests (12/12 complete)
+│       ├── feature2.spec.js (5 tests)
+│       ├── feature6.spec.js (7 tests)
+│       ├── feature8.spec.js (6 tests)
+│       ├── feature9.spec.js (6 tests)
+│       ├── feature10.spec.js (6 tests)
+│       ├── bug3.spec.js (8 tests)
+│       └── feature13.spec.js (7 tests)
+├── TODO.md                        # Feature requests (13/14 complete for v1.4.0, 14 pending)
 └── .git/
 ```
+
+**Note on file copies:** As of v1.4.0, the project has a single canonical live source:
+- `validation/production/index.html` - THE frontend file
+- `validation/production/audio/recorderd.py` - THE recorder
+- `validation/production/audio/start.sh` - THE launcher
+- `test_validation/index.html` - symlink → `../validation/production/index.html`
+
+Previous duplicate copies (`validation/index.html`, `validation/noAgendaTimeMachine.py`, `validation/start.sh`) were removed in v1.4.0. Release artifacts (`release/v1.*/`) are frozen and not touched.
 
 ## Production Architecture
 
@@ -87,12 +95,13 @@ The production implementation follows a simplified, maintainable architecture:
 ### Running the Recorder (Local Testing)
 
 ```bash
-# From validation directory
-cd /home/jeff/ClaudeCode/noAgendaTimeMachine/validation
-./start.sh
+# From validation/production directory (canonical source)
+cd /home/jeff/ClaudeCode/noAgendaTimeMachine/validation/production
+./audio/start.sh
 
 # Or run Python directly (for testing without screen)
-python3 noAgendaTimeMachine.py
+cd audio/
+python3 recorderd.py
 ```
 
 ### Running the Recorder (Production)
@@ -120,7 +129,7 @@ screen -S noagendarecorder -X quit
 
 ### Configuration
 
-Edit `recorderd.py` or `noAgendaTimeMachine.py`:
+Edit `validation/production/audio/recorderd.py`:
 
 ```python
 STREAM_URL = "https://listen.noagendastream.com/noagenda?type=.mp3"
@@ -152,15 +161,15 @@ METADATA_IGNORE_MIN = 5        # Ignore title flips < 5s
 - **Sidecar enrichment**: Frontend fetches track_*.json files for title, start, end, final
 - **Live edge reload**: When playback catches up, reloads live segment with 30s offset
 - **Start overlay**: Captures first interaction for browser autoplay compliance
+- **Slider drag preview (Feature 13)**: As slider is dragged, title updates to show segment at dragged position via `segIndexForTime()`
 
 ### Key Files
 
 | File | Purpose | Lines |
 |------|---------|-------|
-| `recorderd.py` | Python recorder (production name) | 385 |
-| `noAgendaTimeMachine.py` | Python recorder (validation name) | 385 |
-| `index.html` | Static HTML player | 678 |
-| `start.sh` | Screen launcher | 81 |
+| `recorderd.py` | Python recorder (canonical) | 385 |
+| `index.html` | Static HTML player (canonical) | ~680 |
+| `start.sh` | Screen launcher (canonical) | 81 |
 | `TESTING.md` | Testing & validation report | 145 |
 | `DEPLOYMENT.md` | Deployment guide | 204 |
 | `playlist.json` | Segment list (generated at runtime) | - |
@@ -211,7 +220,7 @@ audio/segments/*.mp3 → plays audio
 
 ### Feature Implementation Status
 
-**Completed Features (12/12):**
+**Completed Features (14 total, 13 complete as of v1.4.0):**
 
 | # | Feature | Description | Status | Date |
 |---|---------|-------------|--------|------|
@@ -227,6 +236,15 @@ audio/segments/*.mp3 → plays audio
 | **10** | Larger slider button | Make the slider button larger to support touch interaction on mobile devices | ✅ Complete | 2026-07-11 |
 | **11** | Match NoAgenda.stream CSS | Light theme matching NoAgenda.stream color palette (bluish-gray background, white cards, dark text) | ✅ Complete | 2026-07-11 |
 | **12** | Remaining validation | Complete Bug 3 validation test, all bugs validated | ✅ Complete | 2026-07-11 |
+| **13** | Slider drag updates title | As slider is dragged, title updates to segment at dragged position | ✅ Complete | 2026-07-12 |
+| **14** | Hamburger segment list | Add hamburger button with scrollable segment list | ⏳ Pending | - |
+
+**Simplification (v1.4.0):**
+
+| # | Task | Description | Status |
+|---|------|-------------|--------|
+| **S1** | Consolidate index.html copies | 3 live copies → 1 canonical + symlink | ✅ Complete |
+| **S2** | Consolidate Python/start.sh | Remove validation/ duplicates, canonical is validation/production/audio/ | ✅ Complete |
 
 **Feature #1 (Remove green buffer bar):**
 - Removed CSS `.buffer-bar` styling
@@ -307,7 +325,22 @@ audio/segments/*.mp3 → plays audio
 - Verified `nextTrack()` validation prevents invalid navigation
 - All 38 regression tests passing (feature2, 6, 8, 9, 10, bug3)
 
-**Regression Tests:** 38 Playwright tests, all passing
+**Feature #13 (Slider drag updates title) - v1.4.0:**
+- As slider is dragged across timeline, title updates to segment at dragged position
+- 3-line addition to `input` event handler: `segIndexForTime(time)` + title preview
+- Reuses existing backwards-iteration in `segIndexForTime()` for overlapping segments
+- Guard `if (segments[dragIdx])` prevents crash when segments empty
+- Time/date display continues to update during drag (existing behavior preserved)
+- Validated with 7 Playwright tests (feature13.spec.js)
+
+**Simplification S1/S2 (v1.4.0):**
+- Consolidated 3 live copies of `index.html` to 1 canonical (`validation/production/index.html`) + symlink (`test_validation/index.html`)
+- Removed `validation/index.html`, `validation/noAgendaTimeMachine.py`, `validation/start.sh` (all identical to production copies)
+- Fixed `start.sh` to reference `recorderd.py` (was `noAgendaTimeMachine.py`)
+- `test_validation/index.html` is now symlink → `../validation/production/index.html` (or copy if symlink unavailable)
+- Release artifacts (`release/v1.*/`) remain frozen and untouched
+
+**Regression Tests:** 45 Playwright tests, all passing (5+7+6+6+6+8+7)
 
 ### Known Issues & Considerations
 
@@ -334,7 +367,7 @@ On script restart, Python reclaims existing segments if gap < 30s, preventing or
 ## Code Style
 
 - **Python**: Standard logging, atomic file writes, type-aware comments
-- **JavaScript**: Arrow functions, const/let, structured logging with `log` object
+- **JavaScript**: Arrow functions, const/let, structured logging with `log` object, `segIndexForTime()` backwards iteration, slider drag title preview (Feature 13)
 - **HTML**: Inline styles, light theme (matching NoAgenda.stream), responsive layout, CSS variables
 - **Bash**: POSIX-compliant, clear error messages, helpful output
 
@@ -342,21 +375,19 @@ On script restart, Python reclaims existing segments if gap < 30s, preventing or
 
 ### Working Directory
 
-**Primary work location:** `/home/jeff/ClaudeCode/noAgendaTimeMachine/validation/`
+**Primary work location:** `/home/jeff/ClaudeCode/noAgendaTimeMachine/validation/production/`
 
-This directory contains:
-- Production-ready Python recorder (`noAgendaTimeMachine.py`)
-- Production-ready HTML player (`index.html`)
-- Production-ready screen launcher (`start.sh`)
-- Deployment package (`production/` subdirectory)
-- Design documentation (`docs/`)
+This directory is the canonical source:
+- `index.html` - THE frontend file to edit
+- `audio/recorderd.py` - THE recorder to edit
+- `audio/start.sh` - THE launcher to edit
+- `docs/` - Design documentation
 
 ### Making Changes
 
-1. Edit files in `validation/` directory
-2. Test locally with `./start.sh`
-3. Copy changes to `production/` when ready
-4. Deploy from `production/` to server
+1. Edit files in `validation/production/` (canonical source)
+2. Test via `test_validation/` (Playwright, symlink to canonical index.html)
+3. Deploy from `validation/production/` to server (or use `release/v1.4.0/` package)
 
 ### Deployment
 
@@ -364,9 +395,13 @@ See `validation/production/DEPLOYMENT.md` for complete deployment instructions.
 
 Quick deploy:
 ```bash
-# From validation directory
-cd production/
-# Upload files via sftp/scp
+# From validation/production directory
+# Upload files via sftp/scp to /var/www/html/noAgendaTimeMachine/
+```
+
+Or from release package:
+```bash
+cp -r release/v1.4.0/* /var/www/html/noAgendaTimeMachine/
 ```
 
 ### Debugging
@@ -392,46 +427,37 @@ screen -r noagendarecorder
 ### Running Tests
 
 ```bash
-# From validation directory
-cd /home/jeff/ClaudeCode/noAgendaTimeMachine/validation
-
 # Test HTML player (requires HTTP server)
-python3 -m http.server 8080 &
-curl http://localhost:8080/index.html | grep "No Agenda Time Machine"
+cd /home/jeff/ClaudeCode/noAgendaTimeMachine/test_validation
+python3 -m http.server 8081 &
+curl http://localhost:8081/index.html | grep "No Agenda Time Machine"
 
-# Test screen launcher
-./start.sh
-screen -list | grep noagendarecorder
-
-# Test local mode (without /var/www permissions)
-./test_local.sh
+# Run Playwright tests
+npx playwright test --reporter=list
+npx playwright test feature13 --reporter=list
 
 # View test results
-cat TESTING.md
+cat validation/TESTING.md
 ```
 
 ### Playwright Browser Automation
 
-The project uses Playwright for automated browser testing. Test results are stored in `TestResults/` directory.
+The project uses Playwright for automated browser testing.
 
 **Test environment setup:**
 ```bash
-# Set up test validation environment
-cd /home/jeff/ClaudeCode/noAgendaTimeMachine/test_validation/audio
-cp /home/jeff/ClaudeCode/noAgendaTimeMachine/noAgendaTimeMachine.py .
-cp /home/jeff/ClaudeCode/noAgendaTimeMachine/index.html ../
-
-# Run the recorder (creates segments in segments/)
-python3 noAgendaTimeMachine.py
-
-# In a separate terminal, serve the HTML for Playwright
+# Serve the HTML for Playwright (test_validation/index.html is symlink to canonical)
 cd /home/jeff/ClaudeCode/noAgendaTimeMachine/test_validation
-python3 -m http.server 8080
+python3 -m http.server 8081
+
+# In another terminal, run tests
+npx playwright test --reporter=list
 ```
 
 **Bug validation tests:**
-- Bug 1: Live Edge Stalling (Tests 0001-0004) - ✅ Validated via `TESTRESULT_BUG1_VALIDATION.md`
-- Bug 2: Previous Track Freezing (Tests 0005-0008) - ✅ Primary fix validated via `TESTRESULT_BUG2_VALIDATION.md`
+- Bug 1: Live Edge Stalling - ✅ Validated (2026-07-10)
+- Bug 2: Previous Track Freezing - ✅ Validated (2026-07-11)
+- Bug 3: Next Track Button - ✅ Validated with 8 tests (2026-07-11)
 
 **Bug 1 Status:** ✅ Live Edge Stalling is FIXED and validated (2026-07-10). Live reload uses actual audio duration, buffered range validation, retry limiting (MAX_LIVE_RELOADS=3), and state synchronization all working correctly.
 
@@ -441,9 +467,9 @@ python3 -m http.server 8080
 
 ### Test Case Validation Status
 
-**Test Coverage:** 38 Playwright regression tests, all passing (2026-07-11)
+**Test Coverage:** 45 Playwright regression tests, all passing (2026-07-12)
 
-#### Regression Test Suite
+#### Regression Test Suite (v1.4.0)
 | Test File | Tests | Feature | Status |
 |-----------|-------|---------|--------|
 | `feature2.spec.js` | 5 | 12-hour clock format | ✅ Pass |
@@ -452,6 +478,7 @@ python3 -m http.server 8080
 | `feature9.spec.js` | 6 | Equal button sizes | ✅ Pass |
 | `feature10.spec.js` | 6 | Larger slider button | ✅ Pass |
 | `bug3.spec.js` | 8 | Next Track validation | ✅ Pass |
+| `feature13.spec.js` | 7 | Slider drag updates title | ✅ Pass |
 
 #### Original Test Cases (16)
 | # | Test Case | Description | Status |
@@ -520,24 +547,39 @@ python3 -m http.server 8080
 - ✅ Live button for near-live playback
 - ✅ Release package created at `release/v1.3.0/` with 38 regression tests
 
+### Phase 5: Feature 13 + Simplification (v1.4.0 Complete - 2026-07-12)
+- ✅ Feature 13: Slider drag updates title (3 lines + 7 tests)
+- ✅ Simplification S1/S2: 3 live copies → 1 canonical + symlink (or copy)
+  - Removed `validation/index.html`, `validation/noAgendaTimeMachine.py`, `validation/start.sh`
+  - `test_validation/index.html` is now symlink to canonical
+  - Fixed `start.sh` to reference `recorderd.py` (was `noAgendaTimeMachine.py`)
+- ✅ 45 Playwright regression tests, all passing (38 + 7 new)
+- ✅ Release package at `release/v1.4.0/`
+
 ## Related Files
 
-- **TODO List**: `TODO.md` - Feature requests and UI improvements (12/12 complete)
-- **Release Notes**: `release/v1.3.0/RELEASE_v1.3.0.md` - v1.3.0 release summary (all features)
-- **Release Package**: `release/v1.3.0/` - Current production release (All 12 features, 38 tests)
-- **Design Document**: `validation/docs/2025-07-04-no-agenda-time-machine-production-design.md`
+- **TODO List**: `TODO.md` - Feature requests (13/14 complete for v1.4.0, #14 pending)
+- **Release Notes**: `release/v1.4.0/RELEASE_v1.4.0.md` - v1.4.0 release summary
+- **Release Packages**:
+  - `release/v1.1.0/` - Light theme
+  - `release/v1.2.0/` - UI improvements (7/12)
+  - `release/v1.3.0/` - 12 features complete (38 tests)
+  - `release/v1.4.0/` - Current - Feature 13 + simplification (45 tests)
+- **Design Document**: `validation/production/docs/2025-07-04-no-agenda-time-machine-production-design.md`
 - **Testing Report**: `validation/TESTING.md`
 - **Bug Fix Summary**: `validation/tests/BUG_FIX_SUMMARY.md`
-- **Test Results**: `TestResults/`, `test_validation/tests/` (feature6,8,9,10, bug3 specs)
-- **Previous Releases**: `release/v1.1.0/`, `release/v1.2.0/`
+- **Playwright Tests**: `test_validation/tests/` - feature2, feature6, feature8, feature9, feature10, bug3, feature13 specs (45 tests)
+- **Previous Releases**: `release/v1.1.0/`, `release/v1.2.0/`, `release/v1.3.0/`
 
 ### Quick Reference
 
-- **Current Release**: `release/v1.3.0/` - Full feature set, all bugs fixed, 38 tests passing
-- **Current Version**: v1.3.0 (2026-07-11)
-- **Bug Validation**: All 3 bugs fixed and validated (Bug 3 with 8 tests)
-- **Features Implemented** (12/12):
+- **Current Release**: `release/v1.4.0/` - Feature 13 + simplification, 45 tests passing
+- **Current Version**: v1.4.0 (2026-07-12)
+- **Bug Validation**: All 3 bugs fixed and validated
+- **Features Implemented** (13/14):
   - Remove green bar (1), 12-hour clock (2), Fixed title height (3), Prevent zoom (4)
   - Remove status (5), Live button (6), Update heading (7), White text (8)
   - Equal sizes (9), Larger slider (10), Light theme (11), Bug3 validation (12)
-- **Regression Tests**: 38 tests - feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8)
+  - Slider drag title (13), Hamburger list (14 - pending)
+- **Simplification**: 3 live copies → 1 canonical (validation/production/) + symlink (test_validation/)
+- **Regression Tests**: 45 tests - feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8), feature13 (7)

@@ -4,7 +4,7 @@ This file tracks feature requests and UI improvements for the No Agenda Time Mac
 
 ---
 
-## Feature Requests & UI Improvements
+## Feature Requests & UI Improvements (v1.3.0 Complete - 12/12)
 
 | # | Feature / Bug | Description |
 |---|---------------|-------------|
@@ -23,6 +23,32 @@ This file tracks feature requests and UI improvements for the No Agenda Time Mac
 
 ---
 
+## New Features & Validation Tasks (v1.4.0) - Added 2026-07-12
+
+### v1.4.0 Features (1/2)
+
+| # | Feature | Description | Status |
+|---|---------|-------------|--------|
+| **13** | Slider drag updates title | As the slider is dragged across the timeline, change the title to the title of the segment at that dragged time position | ✅ Complete (2026-07-12) |
+| **14** | Hamburger segment list | Add a hamburger button that when clicked brings up a scrollable list of segments with index of date/time they start (e.g., list showing start time + title, clickable to seek) | ⏳ Pending |
+
+### v1.4.0 Simplification
+
+| # | Task | Description | Status |
+|---|------|-------------|--------|
+| **S1** | Consolidate index.html copies | Reduce 3 live copies (validation/, validation/production/, test_validation/) to 1 canonical + symlink. All live copies were identical. | ✅ Complete (2026-07-12) |
+| **S2** | Consolidate Python/start.sh | Remove validation/noAgendaTimeMachine.py and validation/start.sh — canonical is validation/production/audio/recorderd.py and start.sh | ✅ Complete (2026-07-12) |
+
+### Validation Tasks (Extended Playback & Navigation Stress)
+
+| # | Validation Task | Description | Status |
+|---|-----------------|-------------|--------|
+| **15** | Validate 30s at live edge | Validate 30 seconds playing at live edge, look for unusual log messages and any pauses or jumps in audio playback | ⏳ Pending |
+| **16** | Validate 60s random track skipping | Validate 60 seconds of playback while randomly skipping back and forth in tracks. Monitor for unusual log messages or stopping of playback or playing at the wrong time | ⏳ Pending |
+| **17** | Validate 120s random bidirectional skipping | Validate 120 seconds of playback while randomly skipping back and forth in random forward and rearward direction. Monitor for unusual log messages or stopping of playback or playing at the wrong time | ⏳ Pending |
+
+---
+
 ## Status Legend
 
 - ⏳ Pending
@@ -31,4 +57,5 @@ This file tracks feature requests and UI improvements for the No Agenda Time Mac
 
 ---
 
-*Last updated: 2026-07-11*
+*Last updated: 2026-07-12 - Feature #13 and file simplification S1/S2 complete for v1.4.0*
+

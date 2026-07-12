@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="data:,">
     <title>No Agenda Time Machine</title>
     <style>
@@ -13,34 +13,37 @@
         }
 
         :root {
-            --void: #08080c;
-            --chrome: #1f1f24;
-            --amber: #f59e0b;
-            --green: #10b981;
-            --white: #e5e5e5;
-            --muted: #6b7280;
+            /* Match NoAgenda.stream color palette */
+            --body-bg: #415364;
+            --card-bg: #fff;
+            --text-primary: #222;
+            --text-muted: #767676;
+            --accent: #b08c4f;
+            --link: #77abd9;
             --danger: #ef4444;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--void);
-            color: var(--white);
+            font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif, BlinkMacSystemFont, 'Helvetica Neue', Arial;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            touch-action: pan-y;
         }
 
         .player-card {
-            background: var(--chrome);
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 32px;
             width: 100%;
             max-width: 600px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             position: relative;
+            touch-action: manipulation;
         }
 
         /* Header */
@@ -55,21 +58,20 @@
             font-weight: 600;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: var(--amber);
+            color: var(--accent);
             margin-bottom: 8px;
         }
 
         .track-title {
             font-size: 18px;
             font-weight: 500;
-            color: var(--white);
-            min-height: 24px;
-        }
-
-        .status {
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 4px;
+            color: var(--text-primary);
+            min-height: 72px;
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         /* Time Display */
@@ -78,7 +80,7 @@
             font-size: 48px;
             font-weight: 500;
             text-align: center;
-            color: var(--white);
+            color: var(--text-primary);
             margin: 24px 0 0 0;
             letter-spacing: 0.05em;
         }
@@ -88,7 +90,7 @@
             font-size: 14px;
             font-weight: 400;
             text-align: center;
-            color: var(--muted);
+            color: var(--text-muted);
             margin: 4px 0 24px 0;
         }
 
@@ -97,7 +99,7 @@
             justify-content: space-between;
             font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
             font-size: 12px;
-            color: var(--muted);
+            color: var(--text-muted);
             margin-top: -16px;
             margin-bottom: 16px;
         }
@@ -113,7 +115,7 @@
             appearance: none;
             width: 100%;
             height: 8px;
-            background: var(--void);
+            background: #ddd;
             border-radius: 4px;
             outline: none;
             cursor: pointer;
@@ -124,10 +126,10 @@
             appearance: none;
             width: 20px;
             height: 20px;
-            background: var(--amber);
+            background: var(--accent);
             border-radius: 50%;
             cursor: grab;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(176, 140, 79, 0.4);
             transition: transform 0.1s ease;
         }
 
@@ -139,25 +141,13 @@
         .timeline::-moz-range-thumb {
             width: 20px;
             height: 20px;
-            background: var(--amber);
+            background: var(--accent);
             border: none;
             border-radius: 50%;
             cursor: grab;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(176, 140, 79, 0.4);
         }
 
-        /* Buffer indicator */
-        .buffer-bar {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            height: 4px;
-            background: var(--green);
-            border-radius: 2px;
-            transform: translateY(-50%);
-            pointer-events: none;
-            transition: width 0.3s ease;
-        }
 
         /* Jump Controls */
         .jump-controls {
@@ -168,9 +158,9 @@
         }
 
         .jump-btn {
-            background: var(--void);
+            background: var(--accent);
             border: 1px solid transparent;
-            color: var(--muted);
+            color: #fff;
             padding: 12px 8px;
             border-radius: 8px;
             cursor: pointer;
@@ -181,9 +171,9 @@
         }
 
         .jump-btn:hover {
-            background: var(--chrome);
-            color: var(--white);
-            border-color: var(--muted);
+            background: var(--link);
+            color: #fff;
+            border-color: transparent;
         }
 
         .jump-btn:active {
@@ -200,9 +190,9 @@
         }
 
         .control-btn {
-            background: var(--void);
-            border: 1px solid var(--chrome);
-            color: var(--muted);
+            background: var(--accent);
+            border: 1px solid transparent;
+            color: #fff;
             width: 48px;
             height: 48px;
             border-radius: 50%;
@@ -214,21 +204,21 @@
         }
 
         .control-btn:hover {
-            background: var(--chrome);
-            color: var(--white);
+            background: var(--link);
+            color: #fff;
         }
 
         .play-btn {
             width: 64px;
             height: 64px;
-            background: var(--amber);
+            background: var(--accent);
             border: none;
-            color: var(--void);
+            color: var(--text-primary);
         }
 
         .play-btn:hover {
-            background: #d97706;
-            color: var(--void);
+            background: #8f7242;
+            color: var(--text-primary);
         }
 
         /* Start Overlay */
@@ -238,7 +228,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(8, 8, 12, 0.95);
+            background: rgba(65, 83, 100, 0.95);
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -260,13 +250,13 @@
             font-weight: 600;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: var(--amber);
+            color: var(--accent);
             margin-bottom: 24px;
         }
 
         .overlay-btn {
-            background: var(--amber);
-            color: var(--void);
+            background: var(--accent);
+            color: #fff;
             border: none;
             padding: 16px 40px;
             border-radius: 12px;
@@ -316,7 +306,7 @@
         /* Focus visible for accessibility */
         button:focus-visible,
         .timeline:focus-visible {
-            outline: 2px solid var(--amber);
+            outline: 2px solid var(--accent);
             outline-offset: 2px;
         }
     </style>
@@ -329,16 +319,14 @@
         </div>
 
         <div class="header">
-            <div class="logo">No Agenda DVR</div>
+            <div class="logo">No Agenda Time Machine</div>
             <div class="track-title" id="track-title">Loading stream...</div>
-            <div class="status" id="status">Connecting...</div>
         </div>
 
         <div class="time-display" id="time-display">--:--:--</div>
         <div class="date-display" id="date-display"></div>
 
         <div class="timeline-container">
-            <div class="buffer-bar" id="buffer-bar" style="width: 0%"></div>
             <input type="range" class="timeline" id="timeline" min="0" max="100" value="100">
         </div>
 
@@ -421,11 +409,9 @@
         const UI = {
             overlay: document.getElementById('overlay'),
             trackTitle: document.getElementById('track-title'),
-            status: document.getElementById('status'),
             timeDisplay: document.getElementById('time-display'),
             dateDisplay: document.getElementById('date-display'),
             timeline: document.getElementById('timeline'),
-            bufferBar: document.getElementById('buffer-bar'),
             startTime: document.getElementById('start-time'),
             endTime: document.getElementById('end-time'),
             playBtn: document.getElementById('play-btn'),
@@ -989,26 +975,14 @@
             if (isPaused) {
                 UI.playIcon.style.display = 'block';
                 UI.pauseIcon.style.display = 'none';
-                UI.status.textContent = 'Paused';
             } else {
                 UI.playIcon.style.display = 'none';
                 UI.pauseIcon.style.display = 'block';
-                UI.status.textContent = 'Playing';
             }
 
             // Track title
             if (segments[currentIndex]) {
                 UI.trackTitle.textContent = segments[currentIndex].title || 'No Agenda Stream';
-            }
-
-            // Buffer indicator
-            if (active.buffered.length > 0) {
-                const bufEnd = active.buffered.end(active.buffered.length - 1);
-                const dur = active.duration;
-                if (dur > 0) {
-                    const pct = (bufEnd / dur) * 100;
-                    UI.bufferBar.style.width = Math.min(100, pct) + '%';
-                }
             }
         }
 
@@ -1193,7 +1167,6 @@
 
             if (!segments.length) {
                 log.e('No segments available');
-                UI.status.textContent = 'No segments available';
                 return;
             }
 

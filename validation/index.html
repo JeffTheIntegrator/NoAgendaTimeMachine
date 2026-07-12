@@ -221,6 +221,15 @@
             color: var(--text-primary);
         }
 
+        .live-btn {
+            background: var(--link);
+            border: none;
+        }
+
+        .live-btn:hover {
+            background: #5a8cb7;
+        }
+
         /* Start Overlay */
         .overlay {
             position: absolute;
@@ -361,6 +370,11 @@
             <button class="control-btn" onclick="nextTrack()" title="Next track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+            </button>
+            <button class="control-btn live-btn" onclick="goLive()" title="Go to live">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                 </svg>
             </button>
         </div>
@@ -805,6 +819,19 @@
                 playbackIntent = false;  // User wants pause
                 active.pause();
             }
+        }
+
+        function goLive() {
+            if (!segments.length) {
+                log.w('goLive: no segments available');
+                return;
+            }
+            const lastSeg = segments[segments.length - 1];
+            let target = lastSeg.end - LIVE_EDGE_OFFSET;
+            if (target < lastSeg.start) target = lastSeg.start;
+            log.state('GO_LIVE', { target: target.toFixed(2), segment: lastSeg.title });
+            playbackIntent = true;
+            seekToTime(target);
         }
 
         // ============================================

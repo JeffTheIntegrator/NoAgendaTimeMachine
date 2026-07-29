@@ -216,7 +216,7 @@ audio/segments/*.mp3 → plays audio
 
 ### Feature Implementation Status
 
-**Completed Features (15 total, 14 complete as of v1.4.3):**
+**Completed Features (15 total, 15 complete as of v1.5.0):**
 
 | # | Feature | Description | Status | Date |
 |---|---------|-------------|--------|------|
@@ -234,7 +234,7 @@ audio/segments/*.mp3 → plays audio
 | **12** | Remaining validation | Complete Bug 3 validation test, all bugs validated | ✅ Complete | 2026-07-11 |
 | **13** | Slider drag updates title | As slider is dragged, title updates to segment at dragged position | ✅ Complete | 2026-07-12 |
 | **14a** | Slider improvements | Segment-based slider, button swap, remove time labels | ✅ Complete | 2026-07-28 |
-| **14** | Hamburger segment list | Add hamburger button with scrollable segment list | ⏳ Pending | - |
+| **14** | Hamburger segment list | Add hamburger button with scrollable segment list | ✅ Complete | 2026-07-29 |
 
 **Simplification (v1.4.0):**
 
@@ -265,8 +265,17 @@ audio/segments/*.mp3 → plays audio
   - Input handler: Direct segment index lookup instead of segIndexForTime(timestamp)
   - Heartbeat: Sets slider to currentIndex instead of currentTime
   - Validated with 10 Playwright tests, all 57 regression tests passing
+- **Feature #14 (Hamburger segment list) - v1.5.0:**
+  - Hamburger button (top-right corner) with SVG icon
+  - Dropdown panel (320px wide, max 400px height, scrollable)
+  - Segments displayed in reverse chronological order (newest first)
+  - Each item shows time + title (long titles truncated with ellipsis)
+  - Click segment → seek and close menu
+  - Click outside → close menu (document-level event handler)
+  - Toggle behavior on button click
+  - Validated with 10 Playwright tests, all 67 regression tests passing
 
-**Regression Tests:** 57 Playwright tests, all passing (v1.4.3)
+**Regression Tests:** 67 Playwright tests, all passing (v1.5.0)
 
 ### Known Issues & Considerations
 

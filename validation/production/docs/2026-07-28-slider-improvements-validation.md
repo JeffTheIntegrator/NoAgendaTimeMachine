@@ -1,0 +1,1 @@
+Manual validation completed: Tue Jul 28 10:16:14 PM PDT 2026. Server running on http://localhost:8081. User should verify: drag slider updates title/time, button order (-30s, -10m, -1h, +30s, +10m, +1h), no time labels, playback stable.

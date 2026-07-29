@@ -632,6 +632,36 @@
             UI.segmentList.innerHTML = items;
         }
 
+        function setupSegmentListHandlers() {
+            // Segment item click handler
+            UI.segmentList.addEventListener('click', (e) => {
+                const item = e.target.closest('.segment-item');
+                if (!item) return;
+
+                const index = parseInt(item.dataset.index);
+                if (segments[index]) {
+                    console.log('[USER] Segment list: selected segment', index);
+                    seekToTime(segments[index].start);
+                    toggleSegmentList(); // Close menu
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!UI.segmentDropdown.contains(e.target) && !UI.hamburgerBtn.contains(e.target)) {
+                    UI.segmentDropdown.classList.remove('show');
+                    UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Hamburger button click handler
+            UI.hamburgerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('[USER] Hamburger button clicked');
+                toggleSegmentList();
+            });
+        }
+
         // ============================================
         // Playlist fetching
         // ============================================

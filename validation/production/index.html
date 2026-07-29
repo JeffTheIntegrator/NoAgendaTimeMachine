@@ -1028,10 +1028,12 @@
         });
 
         UI.timeline.addEventListener('change', (e) => {
-            const time = parseFloat(e.target.value);
-            console.log('[USER] Timeline seek to:', fmtTime12Hour(time));
+            const segIndex = parseInt(e.target.value);
+            console.log('[USER] Timeline seek to segment:', segIndex);
             isDragging = false;
-            seekToTime(time);
+            if (segments[segIndex]) {
+                seekToTime(segments[segIndex].start);
+            }
         });
 
         UI.overlay.addEventListener('click', () => {

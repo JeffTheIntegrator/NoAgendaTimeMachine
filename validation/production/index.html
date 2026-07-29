@@ -993,10 +993,8 @@
 
         function updateTimeline() {
             if (!segments.length) return;
-            UI.timeline.min = segments[0].start;
-            UI.timeline.max = segments[segments.length - 1].end;
-            UI.startTime.textContent = fmtTime12Hour(segments[0].start);
-            UI.endTime.textContent = fmtTime12Hour(segments[segments.length - 1].end);
+            UI.timeline.min = 0;
+            UI.timeline.max = segments.length - 1;
         }
 
         // Heartbeat - update time display

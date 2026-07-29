@@ -1003,7 +1003,7 @@
             if (!active.paused && segments[currentIndex]) {
                 currentTime = segments[currentIndex].start + active.currentTime;
                 if (!isDragging) {
-                    UI.timeline.value = currentTime;
+                    UI.timeline.value = currentIndex;
                     UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
                     UI.dateDisplay.textContent = fmtDate(currentTime);
                 }

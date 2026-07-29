@@ -339,27 +339,22 @@
             <input type="range" class="timeline" id="timeline" min="0" max="100" value="100">
         </div>
 
-        <div class="time-labels">
-            <span id="start-time">--:--</span>
-            <span id="end-time">--:--</span>
-        </div>
-
         <div class="jump-controls">
-            <button class="jump-btn" onclick="skip(-3600)">-1h</button>
-            <button class="jump-btn" onclick="skip(-600)">-10m</button>
-            <button class="jump-btn" onclick="skip(-30)">-30s</button>
-            <button class="jump-btn" onclick="skip(30)">+30s</button>
-            <button class="jump-btn" onclick="skip(600)">+10m</button>
-            <button class="jump-btn" onclick="skip(3600)">+1h</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: -1h'); skip(-3600)">-1h</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: -10m'); skip(-600)">-10m</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: -30s'); skip(-30)">-30s</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: +30s'); skip(30)">+30s</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: +10m'); skip(600)">+10m</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: +1h'); skip(3600)">+1h</button>
         </div>
 
         <div class="main-controls">
-            <button class="control-btn" onclick="prevTrack()" title="Previous track">
+            <button class="control-btn" onclick="console.log('[USER] Clicked: Previous track'); prevTrack()" title="Previous track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                 </svg>
             </button>
-            <button class="control-btn play-btn" id="play-btn" onclick="togglePlay()" title="Play/Pause">
+            <button class="control-btn play-btn" id="play-btn" onclick="console.log('[USER] Clicked: Play/Pause'); togglePlay()" title="Play/Pause">
                 <svg class="icon" id="play-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z"/>
                 </svg>
@@ -367,16 +362,19 @@
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
             </button>
-            <button class="control-btn" onclick="nextTrack()" title="Next track">
+            <button class="control-btn" onclick="console.log('[USER] Clicked: Next track'); nextTrack()" title="Next track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                 </svg>
             </button>
-            <button class="control-btn live-btn" onclick="goLive()" title="Go to live">
+            <button class="control-btn live-btn" onclick="console.log('[USER] Clicked: Go Live'); goLive()" title="Go to live">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                 </svg>
             </button>
+        </div>
+        <div class="version-info" style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+            v1.4.2
         </div>
     </div>
 
@@ -654,15 +652,23 @@
                     const playPromise = active.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(e => {
+                            // AbortError is expected when rapid navigation interrupts previous play request
+                            // Not a real error - just user navigating quickly
+                            if (e.name === 'AbortError') {
+                                log.d(playerName, 'Play aborted by new load request (expected during rapid navigation)');
+                                return;  // Don't record as error or attempt recovery
+                            }
                             log.w(playerName, 'Play rejected:', e.message);
                             recordError('playback', 'play_rejected', { index, error: e.message, name: e.name });
 
-                            // Attempt recovery
+                            // Attempt recovery for non-abort errors only
                             setTimeout(() => {
                                 if (!active.paused) return;  // Already playing
                                 log.i(playerName, 'Recovery - retrying play');
                                 active.play().catch(retryErr => {
-                                    log.e(playerName, 'Recovery play failed:', retryErr.message);
+                                    if (retryErr.name !== 'AbortError') {
+                                        log.e(playerName, 'Recovery play failed:', retryErr.message);
+                                    }
                                 });
                             }, 1000);
                         });
@@ -811,6 +817,10 @@
                 playbackIntent = true;  // User wants playback
                 if (!active.src) seekToTime(currentTime);
                 active.play().catch(e => {
+                    if (e.name === 'AbortError') {
+                        log.d('Play aborted in togglePlay (expected during rapid navigation)');
+                        return;
+                    }
                     log.w('Play rejected:', e.message);
                     recordError('playback', 'toggle_play', { error: e.message, name: e.name });
                 });
@@ -1019,6 +1029,7 @@
         // Event Listeners
         // ============================================
         UI.timeline.addEventListener('input', (e) => {
+            console.log('[USER] Timeline drag started');
             isDragging = true;
             const time = parseFloat(e.target.value);
             UI.timeDisplay.textContent = fmtTime12Hour(time);
@@ -1031,16 +1042,23 @@
         });
 
         UI.timeline.addEventListener('change', (e) => {
+            const time = parseFloat(e.target.value);
+            console.log('[USER] Timeline seek to:', fmtTime12Hour(time));
             isDragging = false;
-            seekToTime(parseFloat(e.target.value));
+            seekToTime(time);
         });
 
         UI.overlay.addEventListener('click', () => {
+            console.log('[USER] Clicked: Start Player overlay');
             log.state('OVERLAY_CLICK', 'User interaction captured');
             UI.overlay.classList.add('hidden');
             const active = getActive();
             if (active.src) {
                 active.play().catch(e => {
+                    if (e.name === 'AbortError') {
+                        log.d('Play aborted in overlay click (expected during rapid navigation)');
+                        return;
+                    }
                     log.w('Autoplay failed:', e.message);
                     recordError('playback', 'autoplay_blocked', { error: e.message });
                 });

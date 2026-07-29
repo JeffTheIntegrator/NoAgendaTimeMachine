@@ -1378,6 +1378,9 @@
             // Start playlist polling
             setInterval(fetchPlaylist, POLL_INTERVAL);
 
+            // Setup segment list handlers
+            setupSegmentListHandlers();
+
             // Health check - verify playback is still working
             setInterval(() => {
                 const active = getActive();

@@ -612,6 +612,26 @@
             UI.hamburgerBtn.setAttribute('aria-expanded', isVisible);
         }
 
+        function renderSegmentList() {
+            if (!segments.length) {
+                UI.segmentList.innerHTML = '<div class="segment-item">No segments available</div>';
+                return;
+            }
+
+            // Create items in reverse order (newest first)
+            const items = segments.slice().reverse().map((seg, idx) => {
+                const originalIndex = segments.length - 1 - idx;
+                return `
+                    <div class="segment-item" data-index="${originalIndex}">
+                        <span class="segment-item-time">${fmtTime12Hour(seg.start).split(' ')[0]}</span>
+                        <span class="segment-item-title">${seg.title || 'No Agenda Stream'}</span>
+                    </div>
+                `;
+            }).join('');
+
+            UI.segmentList.innerHTML = items;
+        }
+
         // ============================================
         // Playlist fetching
         // ============================================

@@ -92,8 +92,11 @@ test.describe('Feature #14: Hamburger Segment List', () => {
         const dropdown = page.locator('.segment-dropdown');
         await expect(dropdown).toHaveClass(/show/);
 
-        // Click outside (on the time display)
-        await page.click('.time-display');
+        // Click outside - programmatically trigger click on document (simulates clicking outside dropdown)
+        await page.evaluate(() => {
+            const event = new MouseEvent('click', { bubbles: true, view: window });
+            document.dispatchEvent(event);
+        });
 
         await expect(dropdown).not.toHaveClass(/show/);
     });

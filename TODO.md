@@ -23,13 +23,14 @@ This file tracks feature requests and UI improvements for the No Agenda Time Mac
 
 ---
 
-## New Features & Validation Tasks (v1.4.0) - Added 2026-07-12
+## New Features & Validation Tasks (v1.4.3) - Updated 2026-07-29
 
-### v1.4.0 Features (1/2)
+### v1.4.3 Features
 
 | # | Feature | Description | Status |
 |---|---------|-------------|--------|
 | **13** | Slider drag updates title | As the slider is dragged across the timeline, change the title to the title of the segment at that dragged time position | ✅ Complete (2026-07-12) |
+| **14a** | Slider improvements | Segment-based slider (finer control), swap -1h/-30s button order, remove time labels below timeline | ✅ Complete (2026-07-28) |
 | **14** | Hamburger segment list | Add a hamburger button that when clicked brings up a scrollable list of segments with index of date/time they start (e.g., list showing start time + title, clickable to seek) | ⏳ Pending |
 
 ### v1.4.0 Simplification
@@ -57,5 +58,5 @@ This file tracks feature requests and UI improvements for the No Agenda Time Mac
 
 ---
 
-*Last updated: 2026-07-12 - Feature #13 and file simplification S1/S2 complete for v1.4.0*
+*Last updated: 2026-07-29 - Feature #14a (slider improvements) complete for v1.4.3*
 

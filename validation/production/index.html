@@ -733,8 +733,13 @@
             active.onloadedmetadata = null;
             active.onerror = null;
 
-            active.src = url;
-            log.state('LOAD_START', { player: playerName, url });
+            // Check if player already has this source loaded (avoid redundant load)
+            if (active.src && active.src === url) {
+                log.d(playerName, 'Source already loaded, skipping redundant load');
+            } else {
+                active.src = url;
+                log.state('LOAD_START', { player: playerName, url });
+            }
 
             // Set up error handler for this load operation
             active.onerror = (e) => {
@@ -855,7 +860,11 @@
         function preloadNext() {
             if (currentIndex >= segments.length - 1) return;
             const next = getNext();
-            next.src = segments[currentIndex + 1].url;
+            const nextUrl = segments[currentIndex + 1].url;
+            // Only set src if not already set (avoid redundant loads)
+            if (!next.src || next.src !== nextUrl) {
+                next.src = nextUrl;
+            }
             // Note: No need to call load() - preload='auto' handles it
         }
 

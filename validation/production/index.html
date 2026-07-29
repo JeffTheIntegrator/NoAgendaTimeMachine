@@ -1017,13 +1017,13 @@
         UI.timeline.addEventListener('input', (e) => {
             console.log('[USER] Timeline drag started');
             isDragging = true;
-            const time = parseFloat(e.target.value);
-            UI.timeDisplay.textContent = fmtTime12Hour(time);
-            UI.dateDisplay.textContent = fmtDate(time);
-            // Feature #13: update title during drag to preview target segment
-            const dragIdx = segIndexForTime(time);
-            if (segments[dragIdx]) {
-                UI.trackTitle.textContent = segments[dragIdx].title || 'No Agenda Stream';
+            const segIndex = parseInt(e.target.value);
+            if (segments[segIndex]) {
+                const seg = segments[segIndex];
+                UI.timeDisplay.textContent = fmtTime12Hour(seg.start);
+                UI.dateDisplay.textContent = fmtDate(seg.start);
+                UI.trackTitle.textContent = seg.title || 'No Agenda Stream';
+                currentTime = seg.start;
             }
         });
 

@@ -43,39 +43,23 @@ test.describe('Feature #13: Slider drag updates title', () => {
     test('title during drag matches segment at dragged position', async ({ page }) => {
         const result = await page.evaluate(() => {
             const tl = document.getElementById('timeline');
-            const min = parseFloat(tl.min);
-            const max = parseFloat(tl.max);
+            const min = parseInt(tl.min);
+            const max = parseInt(tl.max);
             if (!isFinite(min) || !isFinite(max) || max <= min) return { skip: true };
 
             // Access the global segments array
             if (typeof segments === 'undefined' || segments.length < 2) return { skip: true };
 
-            // Pick a position in the last third of timeline (likely different segment than start)
-            const targetTime = min + (max - min) * 0.85;
+            // Pick a segment index in the middle (different from start)
+            const targetIdx = Math.max(0, Math.floor(max / 2));
 
-            // Find expected title using same backwards-iteration logic as segIndexForTime
-            let expectedIdx = segments.length - 1;
-            for (let i = segments.length - 1; i >= 0; i--) {
-                if (targetTime >= segments[i].start && targetTime <= segments[i].end) {
-                    expectedIdx = i;
-                    break;
-                }
-                if (targetTime >= segments[i].start) {
-                    expectedIdx = i;
-                }
-            }
-
-            // Use the actual function to match
-            const actualIdx = typeof segIndexForTime === 'function' ? segIndexForTime(targetTime) : expectedIdx;
-
-            tl.value = targetTime;
+            tl.value = targetIdx;
             tl.dispatchEvent(new Event('input', { bubbles: true }));
 
             return {
                 skip: false,
-                targetTime,
-                actualIdx,
-                expectedTitle: segments[actualIdx] ? segments[actualIdx].title : 'N/A',
+                targetIdx,
+                expectedTitle: segments[targetIdx] ? segments[targetIdx].title : 'N/A',
                 displayedTitle: document.getElementById('track-title').textContent,
             };
         });
@@ -147,19 +131,19 @@ test.describe('Feature #13: Slider drag updates title', () => {
             const tl = document.getElementById('timeline');
             // Get all scripts, check for the feature #13 pattern
             const html = document.documentElement.innerHTML;
-            // The input handler should call segIndexForTime and update trackTitle
-            const hasSegmentLookup = html.includes('segIndexForTime') &&
-                                     html.includes('trackTitle') &&
-                                     (html.includes('dragIdx') || html.includes('Feature #13'));
+            // The input handler should use segment index directly and update trackTitle
+            const hasSegmentLookup = html.includes('trackTitle') &&
+                                     html.includes('segIndex') &&
+                                     html.includes('addEventListener(\'input\'');
             return {
                 hasSegmentLookup,
                 hasInputHandler: html.includes("addEventListener('input'"),
-                hasSegIndex: html.includes('segIndexForTime'),
+                hasSegIndexVar: html.includes('segIndex'),
             };
         });
 
         expect(hasFeature13Code.hasInputHandler).toBe(true);
-        expect(hasFeature13Code.hasSegIndex).toBe(true);
+        expect(hasFeature13Code.hasSegIndexVar).toBe(true);
         expect(hasFeature13Code.hasSegmentLookup).toBe(true);
     });
 

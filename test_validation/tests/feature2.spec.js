@@ -37,32 +37,18 @@ test.describe('Feature #2: 12-hour Time Format with Date', () => {
         expect(dateText).toMatch(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}$/);
     });
 
-    test('Start time label uses 12-hour format', async ({ page }) => {
+    test('Start time label removed (slider improvements)', async ({ page }) => {
         const startTime = page.locator('#start-time');
 
-        // Wait for playlist to load
-        await page.waitForTimeout(3000);
-        const startTimeText = await startTime.textContent();
-
-        // Should contain AM or PM
-        expect(startTimeText).toMatch(/(AM|PM)/);
-
-        // Should be in format like "9:30 AM" (seconds may or may not be shown for labels)
-        expect(startTimeText).toMatch(/^\d{1,2}:\d{2}(:\d{2})? (AM|PM)$/);
+        // Time labels were removed in slider improvements
+        await expect(startTime).toHaveCount(0);
     });
 
-    test('End time label uses 12-hour format', async ({ page }) => {
+    test('End time label removed (slider improvements)', async ({ page }) => {
         const endTime = page.locator('#end-time');
 
-        // Wait for playlist to load
-        await page.waitForTimeout(3000);
-        const endTimeText = await endTime.textContent();
-
-        // Should contain AM or PM
-        expect(endTimeText).toMatch(/(AM|PM)/);
-
-        // Should be in format like "9:30 PM" (seconds may or may not be shown for labels)
-        expect(endTimeText).toMatch(/^\d{1,2}:\d{2}(:\d{2})? (AM|PM)$/);
+        // Time labels were removed in slider improvements
+        await expect(endTime).toHaveCount(0);
     });
 
     test('Time display has no leading zero for hour (1 AM not 01 AM)', async ({ page }) => {

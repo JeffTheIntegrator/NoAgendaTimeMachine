@@ -499,6 +499,10 @@
         const playerB = new Audio();
         let usePlayerA = true;
 
+        // Track pending timeouts per player (fix for infinite reload loop bug)
+        let playerATimeout = null;
+        let playerBTimeout = null;
+
         // Add recovery counters to player objects
         playerA.recoveryCount = 0;
         playerB.recoveryCount = 0;
@@ -509,6 +513,26 @@
 
         const switchPlayer = () => {
             usePlayerA = !usePlayerA;
+
+            // Clear pending timeouts for BOTH players to prevent orphaned callbacks
+            if (playerATimeout) {
+                clearTimeout(playerATimeout);
+                playerATimeout = null;
+            }
+            if (playerBTimeout) {
+                clearTimeout(playerBTimeout);
+                playerBTimeout = null;
+            }
+
+            // Clear event handlers on BOTH players to prevent stale callbacks
+            // This fixes the infinite reload loop bug where preloadNext() would trigger
+            // the inactive player's old onloadedmetadata handler, which would call
+            // playSegment() with old closure variables (stale segment index/offset)
+            playerA.onloadedmetadata = null;
+            playerA.onerror = null;
+            playerB.onloadedmetadata = null;
+            playerB.onerror = null;
+
             return getActive();
         };
 
@@ -736,10 +760,17 @@
             // Check if player already has this source loaded (avoid redundant load)
             if (active.src && active.src === url) {
                 log.d(playerName, 'Source already loaded, skipping redundant load');
-            } else {
-                active.src = url;
-                log.state('LOAD_START', { player: playerName, url });
+                // Clear any pending timeout for this player since we're not loading
+                const timeoutRef = active === playerA ? playerATimeout : playerBTimeout;
+                if (timeoutRef) {
+                    clearTimeout(timeoutRef);
+                    if (active === playerA) playerATimeout = null;
+                    else playerBTimeout = null;
+                }
+                return;  // Exit early, don't call load()
             }
+            active.src = url;
+            log.state('LOAD_START', { player: playerName, url });
 
             // Set up error handler for this load operation
             active.onerror = (e) => {
@@ -847,10 +878,23 @@
                 }
             }, 10000);  // 10 second timeout
 
+            // Store timeout reference for later clearing when switching players
+            if (active === playerA) {
+                playerATimeout = metadataTimeout;
+            } else {
+                playerBTimeout = metadataTimeout;
+            }
+
             // Clear timeout when metadata loads
             const originalHandler = active.onloadedmetadata;
             active.onloadedmetadata = function(...args) {
                 clearTimeout(metadataTimeout);
+                // Also clear the tracking reference
+                if (active === playerA) {
+                    playerATimeout = null;
+                } else {
+                    playerBTimeout = null;
+                }
                 originalHandler.apply(this, args);
             };
 

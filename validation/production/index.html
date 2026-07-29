@@ -606,6 +606,12 @@
             return segments.length - 1;
         }
 
+        function toggleSegmentList() {
+            UI.segmentDropdown.classList.toggle('show');
+            const isVisible = UI.segmentDropdown.classList.contains('show');
+            UI.hamburgerBtn.setAttribute('aria-expanded', isVisible);
+        }
+
         // ============================================
         // Playlist fetching
         // ============================================

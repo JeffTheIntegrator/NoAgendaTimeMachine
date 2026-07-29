@@ -683,6 +683,7 @@
                 log.i('Playlist updated:', prevCount, '->', segments.length, 'segments');
                 log.network('FETCH_SUCCESS', url, resp.status);
                 updateTimeline();
+                renderSegmentList();
             } catch (e) {
                 const err = `Playlist error: ${e.message}`;
                 log.w(err);

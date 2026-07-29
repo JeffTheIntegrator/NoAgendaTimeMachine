@@ -200,6 +200,7 @@ audio/segments/*.mp3 → plays audio
 | **Bug 1** | Live Edge Stalling - Audio stops while UI shows playing, buffer depletion errors | ✅ FIXED | ✅ Yes | ✅ Yes (2026-07-10) |
 | **Bug 2** | Previous Track Freezing - Audio freezes after clicking previous track | ✅ FIXED | ✅ Yes | ✅ Yes (2026-07-11) |
 | **Bug 3** | Next Track Button - Does not advance to next segment | ✅ FIXED | ✅ Yes | ✅ Yes (2026-07-11) - 8 tests in bug3.spec.js |
+| **Bug 4** | Infinite Reload Loop - Excessive data transfer (130MB/s instead of 20KB/s) after hamburger navigation | ✅ FIXED | ✅ Yes | ✅ Yes (2026-07-29) |
 
 **Bug 1 & 2 Details:**
 - Fixed via `switchPlayer()`, `playbackIntent` state tracking, recovery limiting (`MAX_RECOVERY_ATTEMPTS=3`, `MAX_LIVE_RELOADS=3`)
@@ -214,9 +215,25 @@ audio/segments/*.mp3 → plays audio
 - Fix 1: Changed `segIndexForTime()` to iterate backwards (prefer later segment when timestamps overlap)
 - Fix 2: Added robust validation to `nextTrack()` function for consistency with `prevTrack()`
 
+**Bug 4 Details:**
+- Reported via TestResult0014 - "Very large data transfer"
+- Root cause: Stale event handlers on inactive player triggered by `preloadNext()`
+  - `playSegment()` sets up event handlers (`onloadedmetadata`, `onerror`) that capture `index`, `offset`, `shouldPlay` in their closure
+  - When user switches players via hamburger menu, the inactive player's event handlers are **NOT cleared**
+  - `preloadNext()` sets `inactivePlayer.src = nextSegment.url` to preload the next segment
+  - **Setting src triggers the inactive player's OLD `onloadedmetadata` handler**
+  - That stale handler calls `playSegment()` with **OLD closure values** (previous segment index/offset)
+  - Each call creates NEW event handlers → infinite loop
+  - Same audio file downloaded repeatedly at 130MB/s instead of 20KB/s
+- Fix: Clear event handlers when switching players
+  - Clear `onloadedmetadata` and `onerror` on BOTH players in `switchPlayer()`
+  - Also clears pending timeouts for additional safety
+  - Ensures `preloadNext()` cannot trigger stale callbacks
+- Validated with manual testing against TestResult0014 scenario
+
 ### Feature Implementation Status
 
-**Completed Features (15 total, 15 complete as of v1.5.0):**
+**Completed Features (15 total, 15 complete as of v1.5.1):**
 
 | # | Feature | Description | Status | Date |
 |---|---------|-------------|--------|------|
@@ -275,7 +292,7 @@ audio/segments/*.mp3 → plays audio
   - Toggle behavior on button click
   - Validated with 10 Playwright tests, all 67 regression tests passing
 
-**Regression Tests:** 67 Playwright tests, all passing (v1.5.0)
+**Regression Tests:** 67 Playwright tests, all passing (v1.5.1)
 
 ### Known Issues & Considerations
 
@@ -526,6 +543,7 @@ npx playwright test --reporter=list
 - **Bug 1**: Live Edge Stalling - FIXED via actual duration, buffered validation, MAX_LIVE_RELOADS=3
 - **Bug 2**: Previous Track Freezing - FIXED via switchPlayer(), playbackIntent, MAX_RECOVERY_ATTEMPTS=3
 - **Bug 3**: Next Track Button - FIXED via backwards iteration in segIndexForTime() + validation, 8 tests in bug3.spec.js
-- **All 3 bugs**: Validated 2026-07-11, 45 regression tests passing (v1.4.0)
+- **Bug 4**: Infinite Reload Loop - FIXED via clearing event handlers on player switch (onloadedmetadata, onerror on both players)
+- **All 4 bugs**: Validated 2026-07-29, 67 regression tests passing (v1.5.1)
 - **Feature 13**: Slider drag title preview - implemented via segIndexForTime() in input handler
 - **Simplification**: 3 live copies → 1 canonical + symlink - completed 2026-07-12

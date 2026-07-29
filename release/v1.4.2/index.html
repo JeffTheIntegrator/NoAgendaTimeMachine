@@ -94,6 +94,16 @@
             margin: 4px 0 24px 0;
         }
 
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: -16px;
+            margin-bottom: 16px;
+        }
+
         /* Timeline */
         .timeline-container {
             position: relative;
@@ -220,100 +230,6 @@
             background: #5a8cb7;
         }
 
-        .hamburger-btn {
-            position: absolute;
-            top: 24px;
-            right: 32px;
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            padding: 8px;
-            transition: color 0.15s ease;
-        }
-
-        .hamburger-btn:hover {
-            color: var(--link);
-        }
-
-        .hamburger-btn:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        .segment-dropdown {
-            position: absolute;
-            top: 60px;
-            right: 32px;
-            width: 320px;
-            max-height: 400px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            display: none;
-            z-index: 50;
-        }
-
-        .segment-dropdown.show {
-            display: block;
-        }
-
-        .segment-list {
-            max-height: 380px;
-            overflow-y: auto;
-            padding: 8px;
-        }
-
-        .segment-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.15s ease;
-        }
-
-        .segment-item:hover {
-            background: #f5f5f5;
-        }
-
-        .segment-item-time {
-            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
-            font-size: 12px;
-            color: var(--text-muted);
-            min-width: 60px;
-        }
-
-        .segment-item-title {
-            font-size: 14px;
-            color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex: 1;
-        }
-
-        /* Scrollbar styling for segment list */
-        .segment-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .segment-list::-webkit-scrollbar-track {
-            background: #f5f5f5;
-            border-radius: 4px;
-        }
-
-        .segment-list::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 4px;
-        }
-
-        .segment-list::-webkit-scrollbar-thumb:hover {
-            background: var(--text-primary);
-        }
-
         /* Start Overlay */
         .overlay {
             position: absolute;
@@ -413,18 +329,7 @@
 
         <div class="header">
             <div class="logo">No Agenda Time Machine</div>
-            <button class="hamburger-btn" id="hamburger-btn" aria-label="Segment list">
-                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                </svg>
-            </button>
             <div class="track-title" id="track-title">Loading stream...</div>
-        </div>
-
-        <div class="segment-dropdown" id="segment-dropdown">
-            <div class="segment-list" id="segment-list">
-                <!-- Segments populated by JavaScript -->
-            </div>
         </div>
 
         <div class="time-display" id="time-display">--:--:--</div>
@@ -434,10 +339,15 @@
             <input type="range" class="timeline" id="timeline" min="0" max="100" value="100">
         </div>
 
+        <div class="time-labels">
+            <span id="start-time">--:--</span>
+            <span id="end-time">--:--</span>
+        </div>
+
         <div class="jump-controls">
-            <button class="jump-btn" onclick="console.log('[USER] Skip: -30s'); skip(-30)">-30s</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: -10m'); skip(-600)">-10m</button>
             <button class="jump-btn" onclick="console.log('[USER] Skip: -1h'); skip(-3600)">-1h</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: -10m'); skip(-600)">-10m</button>
+            <button class="jump-btn" onclick="console.log('[USER] Skip: -30s'); skip(-30)">-30s</button>
             <button class="jump-btn" onclick="console.log('[USER] Skip: +30s'); skip(30)">+30s</button>
             <button class="jump-btn" onclick="console.log('[USER] Skip: +10m'); skip(600)">+10m</button>
             <button class="jump-btn" onclick="console.log('[USER] Skip: +1h'); skip(3600)">+1h</button>
@@ -469,7 +379,7 @@
             </button>
         </div>
         <div class="version-info" style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
-            v1.5.1
+            v1.4.2
         </div>
     </div>
 
@@ -499,10 +409,6 @@
         const playerB = new Audio();
         let usePlayerA = true;
 
-        // Track pending timeouts per player (fix for infinite reload loop bug)
-        let playerATimeout = null;
-        let playerBTimeout = null;
-
         // Add recovery counters to player objects
         playerA.recoveryCount = 0;
         playerB.recoveryCount = 0;
@@ -513,26 +419,6 @@
 
         const switchPlayer = () => {
             usePlayerA = !usePlayerA;
-
-            // Clear pending timeouts for BOTH players to prevent orphaned callbacks
-            if (playerATimeout) {
-                clearTimeout(playerATimeout);
-                playerATimeout = null;
-            }
-            if (playerBTimeout) {
-                clearTimeout(playerBTimeout);
-                playerBTimeout = null;
-            }
-
-            // Clear event handlers on BOTH players to prevent stale callbacks
-            // This fixes the infinite reload loop bug where preloadNext() would trigger
-            // the inactive player's old onloadedmetadata handler, which would call
-            // playSegment() with old closure variables (stale segment index/offset)
-            playerA.onloadedmetadata = null;
-            playerA.onerror = null;
-            playerB.onloadedmetadata = null;
-            playerB.onerror = null;
-
             return getActive();
         };
 
@@ -543,12 +429,11 @@
             timeDisplay: document.getElementById('time-display'),
             dateDisplay: document.getElementById('date-display'),
             timeline: document.getElementById('timeline'),
+            startTime: document.getElementById('start-time'),
+            endTime: document.getElementById('end-time'),
             playBtn: document.getElementById('play-btn'),
             playIcon: document.getElementById('play-icon'),
-            pauseIcon: document.getElementById('pause-icon'),
-            hamburgerBtn: document.getElementById('hamburger-btn'),
-            segmentDropdown: document.getElementById('segment-dropdown'),
-            segmentList: document.getElementById('segment-list')
+            pauseIcon: document.getElementById('pause-icon')
         };
 
         // ============================================
@@ -630,62 +515,6 @@
             return segments.length - 1;
         }
 
-        function toggleSegmentList() {
-            UI.segmentDropdown.classList.toggle('show');
-            const isVisible = UI.segmentDropdown.classList.contains('show');
-            UI.hamburgerBtn.setAttribute('aria-expanded', isVisible);
-        }
-
-        function renderSegmentList() {
-            if (!segments.length) {
-                UI.segmentList.innerHTML = '<div class="segment-item">No segments available</div>';
-                return;
-            }
-
-            // Create items in reverse order (newest first)
-            const items = segments.slice().reverse().map((seg, idx) => {
-                const originalIndex = segments.length - 1 - idx;
-                return `
-                    <div class="segment-item" data-index="${originalIndex}">
-                        <span class="segment-item-time">${fmtTime12Hour(seg.start).split(' ')[0]}</span>
-                        <span class="segment-item-title">${seg.title || 'No Agenda Stream'}</span>
-                    </div>
-                `;
-            }).join('');
-
-            UI.segmentList.innerHTML = items;
-        }
-
-        function setupSegmentListHandlers() {
-            // Segment item click handler
-            UI.segmentList.addEventListener('click', (e) => {
-                const item = e.target.closest('.segment-item');
-                if (!item) return;
-
-                const index = parseInt(item.dataset.index);
-                if (segments[index]) {
-                    console.log('[USER] Segment list: selected segment', index);
-                    seekToTime(segments[index].start);
-                    toggleSegmentList(); // Close menu
-                }
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!UI.segmentDropdown.contains(e.target) && !UI.hamburgerBtn.contains(e.target)) {
-                    UI.segmentDropdown.classList.remove('show');
-                    UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            // Hamburger button click handler
-            UI.hamburgerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log('[USER] Hamburger button clicked');
-                toggleSegmentList();
-            });
-        }
-
         // ============================================
         // Playlist fetching
         // ============================================
@@ -707,7 +536,6 @@
                 log.i('Playlist updated:', prevCount, '->', segments.length, 'segments');
                 log.network('FETCH_SUCCESS', url, resp.status);
                 updateTimeline();
-                renderSegmentList();
             } catch (e) {
                 const err = `Playlist error: ${e.message}`;
                 log.w(err);
@@ -757,18 +585,6 @@
             active.onloadedmetadata = null;
             active.onerror = null;
 
-            // Check if player already has this source loaded (avoid redundant load)
-            if (active.src && active.src === url) {
-                log.d(playerName, 'Source already loaded, skipping redundant load');
-                // Clear any pending timeout for this player since we're not loading
-                const timeoutRef = active === playerA ? playerATimeout : playerBTimeout;
-                if (timeoutRef) {
-                    clearTimeout(timeoutRef);
-                    if (active === playerA) playerATimeout = null;
-                    else playerBTimeout = null;
-                }
-                return;  // Exit early, don't call load()
-            }
             active.src = url;
             log.state('LOAD_START', { player: playerName, url });
 
@@ -878,23 +694,10 @@
                 }
             }, 10000);  // 10 second timeout
 
-            // Store timeout reference for later clearing when switching players
-            if (active === playerA) {
-                playerATimeout = metadataTimeout;
-            } else {
-                playerBTimeout = metadataTimeout;
-            }
-
             // Clear timeout when metadata loads
             const originalHandler = active.onloadedmetadata;
             active.onloadedmetadata = function(...args) {
                 clearTimeout(metadataTimeout);
-                // Also clear the tracking reference
-                if (active === playerA) {
-                    playerATimeout = null;
-                } else {
-                    playerBTimeout = null;
-                }
                 originalHandler.apply(this, args);
             };
 
@@ -904,11 +707,7 @@
         function preloadNext() {
             if (currentIndex >= segments.length - 1) return;
             const next = getNext();
-            const nextUrl = segments[currentIndex + 1].url;
-            // Only set src if not already set (avoid redundant loads)
-            if (!next.src || next.src !== nextUrl) {
-                next.src = nextUrl;
-            }
+            next.src = segments[currentIndex + 1].url;
             // Note: No need to call load() - preload='auto' handles it
         }
 
@@ -1211,8 +1010,10 @@
 
         function updateTimeline() {
             if (!segments.length) return;
-            UI.timeline.min = 0;
-            UI.timeline.max = segments.length - 1;
+            UI.timeline.min = segments[0].start;
+            UI.timeline.max = segments[segments.length - 1].end;
+            UI.startTime.textContent = fmtTime12Hour(segments[0].start);
+            UI.endTime.textContent = fmtTime12Hour(segments[segments.length - 1].end);
         }
 
         // Heartbeat - update time display
@@ -1221,7 +1022,7 @@
             if (!active.paused && segments[currentIndex]) {
                 currentTime = segments[currentIndex].start + active.currentTime;
                 if (!isDragging) {
-                    UI.timeline.value = currentIndex;
+                    UI.timeline.value = currentTime;
                     UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
                     UI.dateDisplay.textContent = fmtDate(currentTime);
                 }
@@ -1235,23 +1036,21 @@
         UI.timeline.addEventListener('input', (e) => {
             console.log('[USER] Timeline drag started');
             isDragging = true;
-            const segIndex = parseInt(e.target.value);
-            if (segments[segIndex]) {
-                const seg = segments[segIndex];
-                UI.timeDisplay.textContent = fmtTime12Hour(seg.start);
-                UI.dateDisplay.textContent = fmtDate(seg.start);
-                UI.trackTitle.textContent = seg.title || 'No Agenda Stream';
-                currentTime = seg.start;
+            const time = parseFloat(e.target.value);
+            UI.timeDisplay.textContent = fmtTime12Hour(time);
+            UI.dateDisplay.textContent = fmtDate(time);
+            // Feature #13: update title during drag to preview target segment
+            const dragIdx = segIndexForTime(time);
+            if (segments[dragIdx]) {
+                UI.trackTitle.textContent = segments[dragIdx].title || 'No Agenda Stream';
             }
         });
 
         UI.timeline.addEventListener('change', (e) => {
-            const segIndex = parseInt(e.target.value);
-            console.log('[USER] Timeline seek to segment:', segIndex);
+            const time = parseFloat(e.target.value);
+            console.log('[USER] Timeline seek to:', fmtTime12Hour(time));
             isDragging = false;
-            if (segments[segIndex]) {
-                seekToTime(segments[segIndex].start);
-            }
+            seekToTime(time);
         });
 
         UI.overlay.addEventListener('click', () => {
@@ -1413,7 +1212,6 @@
 
             currentIndex = segments.length - 1;
             currentTime = target;
-            UI.timeline.value = currentIndex;
 
             log.state('INIT_CONFIG', {
                 totalSegments: segments.length,
@@ -1430,9 +1228,6 @@
 
             // Start playlist polling
             setInterval(fetchPlaylist, POLL_INTERVAL);
-
-            // Setup segment list handlers
-            setupSegmentListHandlers();
 
             // Health check - verify playback is still working
             setInterval(() => {

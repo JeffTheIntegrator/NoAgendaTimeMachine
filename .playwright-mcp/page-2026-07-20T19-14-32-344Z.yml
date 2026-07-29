@@ -1,0 +1,25 @@
+- generic [ref=e2]:
+  - generic:
+    - heading "No Agenda Time Machine" [level=2]
+    - button "▶ Start Player"
+  - generic [ref=e6]:
+    - generic [ref=e7]: No Agenda Time Machine
+    - generic [ref=e8]: "Bowl After Bowl #446: \"The Rest of the Woman\" - Wed, 08 Jul 2026 - Sir Spencer and Dame Laurien"
+  - generic [ref=e9]: 11:00:58 PM
+  - generic [ref=e10]: Fri Jul 10
+  - slider [ref=e12] [cursor=pointer]: "1783749201.01908"
+  - generic [ref=e13]:
+    - generic [ref=e14]: 10:53:21 PM
+    - generic [ref=e15]: 11:01:28 PM
+  - generic [ref=e16]:
+    - button "-1h" [ref=e17] [cursor=pointer]
+    - button "-10m" [ref=e18] [cursor=pointer]
+    - button "-30s" [ref=e19] [cursor=pointer]
+    - button "+30s" [ref=e20] [cursor=pointer]
+    - button "+10m" [ref=e21] [cursor=pointer]
+    - button "+1h" [ref=e22] [cursor=pointer]
+  - generic [ref=e23]:
+    - button "Previous track" [active] [ref=e24] [cursor=pointer]
+    - button "Play/Pause" [ref=e27] [cursor=pointer]
+    - button "Next track" [ref=e30] [cursor=pointer]
+    - button "Go to live" [ref=e33] [cursor=pointer]

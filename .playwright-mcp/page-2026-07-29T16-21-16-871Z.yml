@@ -1,0 +1,331 @@
+- generic [ref=e2]:
+  - generic:
+    - heading "No Agenda Time Machine" [level=2]
+    - button "▶ Start Player"
+  - generic [ref=e6]:
+    - generic [ref=e7]: No Agenda Time Machine
+    - button "Segment list" [expanded] [active] [ref=e8] [cursor=pointer]
+    - generic [ref=e11]: "Bowl After Bowl #448: \"I Love You Boys\" - Wed, 22 Jul 2026 - Sir Spencer and Dame Laurien"
+  - generic [ref=e40]:
+    - generic [ref=e41] [cursor=pointer]:
+      - generic [ref=e42]: 5:26:19
+      - generic [ref=e43]: "Bowl After Bowl #448: \"I Love You Boys\" - Wed, 22 Jul 2026 - Sir Spencer and Dame Laurien"
+    - generic [ref=e44] [cursor=pointer]:
+      - generic [ref=e45]: 5:26:09
+      - generic [ref=e46]: Â§ No Agenda - Where Freedom Lives and Censorship Comes to Die
+    - generic [ref=e47] [cursor=pointer]:
+      - generic [ref=e48]: 5:22:13
+      - generic [ref=e49]: Jon Worthy and the Bends - Help Me
+    - generic [ref=e50] [cursor=pointer]:
+      - generic [ref=e51]: 5:22:04
+      - generic [ref=e52]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e53] [cursor=pointer]:
+      - generic [ref=e54]: 3:44:06
+      - generic [ref=e55]: "Canary Cry News Talk: \"BEAST MARK with Dr. Joye Jeffries Pugh | CCR 198\" - Sat, 25 Jul 2026 - canarycryradio.com"
+    - generic [ref=e56] [cursor=pointer]:
+      - generic [ref=e57]: 3:43:50
+      - generic [ref=e58]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e59] [cursor=pointer]:
+      - generic [ref=e60]: 3:38:22
+      - generic [ref=e61]: Radio Nowhere - Mission Control II [4x4]
+    - generic [ref=e62] [cursor=pointer]:
+      - generic [ref=e63]: 3:25:40
+      - generic [ref=e64]: "Mere Mortals Book Reviews: \"I Read Elon Musk"
+    - generic [ref=e65] [cursor=pointer]:
+      - generic [ref=e66]: 3:22:38
+      - generic [ref=e67]: The Gunshy - No Gods, No Bastards
+    - generic [ref=e68] [cursor=pointer]:
+      - generic [ref=e69]: 1:16:20
+      - generic [ref=e70]: "Unrelenting #198: \"Magic Pixel\" - Fri, 24 Jul 2026 - Gene Naftulyev & Darren O"
+    - generic [ref=e71] [cursor=pointer]:
+      - generic [ref=e72]: 1:16:10
+      - generic [ref=e73]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e74] [cursor=pointer]:
+      - generic [ref=e75]: 1:12:10
+      - generic [ref=e76]: Shearer - I
+    - generic [ref=e77] [cursor=pointer]:
+      - generic [ref=e78]: 1:11:57
+      - generic [ref=e79]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e80] [cursor=pointer]:
+      - generic [ref=e81]: 10:52:52
+      - generic [ref=e82]: "Planet Rage #230: \"John C. Dvorak Is Wrong\" - Mon, 20 Jul 2026 - Larry Bleidner & Darren O"
+    - generic [ref=e83] [cursor=pointer]:
+      - generic [ref=e84]: 10:52:43
+      - generic [ref=e85]: Â§ All Talk. No Commercials. No Agenda.
+    - generic [ref=e86] [cursor=pointer]:
+      - generic [ref=e87]: 10:48:43
+      - generic [ref=e88]: Vienna Ditto - The Undefeated
+    - generic [ref=e89] [cursor=pointer]:
+      - generic [ref=e90]: 10:22:50
+      - generic [ref=e91]: "A Walk Through the Mind: \"Building & Controlling Waterways\" - Tue, 23 Jun 2026 - billybon3s.com"
+    - generic [ref=e92] [cursor=pointer]:
+      - generic [ref=e93]: 10:22:29
+      - generic [ref=e94]: Mike Phirman - Chicken Monkey Duck
+    - generic [ref=e95] [cursor=pointer]:
+      - generic [ref=e96]: 7:04:29
+      - generic [ref=e97]: Bowl After Bowl Episode 449 *LIVE* https://bowlafterbowl.com/live
+    - generic [ref=e98] [cursor=pointer]:
+      - generic [ref=e99]: 5:42:47
+      - generic [ref=e100]: "LIVE: Dvorak and Horowitz Unplugged"
+    - generic [ref=e101] [cursor=pointer]:
+      - generic [ref=e102]: 3:54:27
+      - generic [ref=e103]: "MMO #229 LIVE - Millennial Media Offensive: On The Offensive! STREAM: http://stream.mmo.show , CHAT: https://chat.mmo.show DONATE: http://mmo.show/donate/ , SHOWPAGE: http://mmo.show, Live Every Tuesday @ 5pm central"
+    - generic [ref=e104] [cursor=pointer]:
+      - generic [ref=e105]: 3:54:21
+      - generic [ref=e106]: "Our Big Dumb Mouth #1409: \"Data Center Revolt | Rogue AI | Goldfish Rights\" - Sat, 25 Jul 2026 - ourbigdumbmouth.com"
+    - generic [ref=e107] [cursor=pointer]:
+      - generic [ref=e108]: 3:11:01
+      - generic [ref=e109]: "MMO #229 LIVE - Millennial Media Offensive: On The Offensive! STREAM: http://stream.mmo.show , CHAT: https://chat.mmo.show DONATE: http://mmo.show/donate/ , SHOWPAGE: http://mmo.show, Live Every Tuesday @ 5pm central"
+    - generic [ref=e110] [cursor=pointer]:
+      - generic [ref=e111]: 1:17:54
+      - generic [ref=e112]: "Our Big Dumb Mouth #1409: \"Data Center Revolt | Rogue AI | Goldfish Rights\" - Sat, 25 Jul 2026 - ourbigdumbmouth.com"
+    - generic [ref=e113] [cursor=pointer]:
+      - generic [ref=e114]: 1:17:44
+      - generic [ref=e115]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e116] [cursor=pointer]:
+      - generic [ref=e117]: 1:12:44
+      - generic [ref=e118]: Mike Phirman - Street Meat (You Keep Tauntin
+    - generic [ref=e119] [cursor=pointer]:
+      - generic [ref=e120]: 1:12:31
+      - generic [ref=e121]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e122] [cursor=pointer]:
+      - generic [ref=e123]: 11:07:52
+      - generic [ref=e124]: "Airline Pilot Guy #715: \"The Punkah Louvre\" - Mon, 13 Jul 2026 - airlinepilotguy.com"
+    - generic [ref=e125] [cursor=pointer]:
+      - generic [ref=e126]: 11:07:43
+      - generic [ref=e127]: Â§ All Talk. No Commercials. No Agenda.
+    - generic [ref=e128] [cursor=pointer]:
+      - generic [ref=e129]: 11:04:49
+      - generic [ref=e130]: Louis Lingg and the Bombs - Freedom Fighter
+    - generic [ref=e131] [cursor=pointer]:
+      - generic [ref=e132]: 10:22:44
+      - generic [ref=e133]: "Randumb Thoughts #370: \"Relationally Stupid\" - Wed, 15 Jul 2026 - randumbthoughts.com"
+    - generic [ref=e134] [cursor=pointer]:
+      - generic [ref=e135]: 10:18:10
+      - generic [ref=e136]: Duo Teslar - Universal Funk
+    - generic [ref=e137] [cursor=pointer]:
+      - generic [ref=e138]: 9:26:43
+      - generic [ref=e139]: "Grumpy Old Dames: \"Good Knight JCD\" - Thu, 23 Jul 2026 - Lady Vox and Dame Black Loca"
+    - generic [ref=e140] [cursor=pointer]:
+      - generic [ref=e141]: 9:26:31
+      - generic [ref=e142]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e143] [cursor=pointer]:
+      - generic [ref=e144]: 9:23:51
+      - generic [ref=e145]: Ben Walker - Candy
+    - generic [ref=e146] [cursor=pointer]:
+      - generic [ref=e147]: 9:23:42
+      - generic [ref=e148]: voidzero - § No Agenda Live - High quality podcasts - You
+    - generic [ref=e149] [cursor=pointer]:
+      - generic [ref=e150]: 7:49:53
+      - generic [ref=e151]: "Podcasting 2.0 #266: \"Research Velocity\" - Fri, 24 Jul 2026 - Adam Curry and Dave Jones"
+    - generic [ref=e152] [cursor=pointer]:
+      - generic [ref=e153]: 7:49:38
+      - generic [ref=e154]: Â§ Nick The Rat - The No Agenda Stream
+    - generic [ref=e155] [cursor=pointer]:
+      - generic [ref=e156]: 7:43:24
+      - generic [ref=e157]: The Absolute Sky - Days Under The Sun
+    - generic [ref=e158] [cursor=pointer]:
+      - generic [ref=e159]: 7:43:16
+      - generic [ref=e160]: Â§ All Talk. No Commercials. No Agenda.
+    - generic [ref=e161] [cursor=pointer]:
+      - generic [ref=e162]: 5:18:43
+      - generic [ref=e163]: "Just Two Good Old Boys #172: \"172 From Flock Cameras To Starship Landings And The Real Costs Of Modern Tech\" - Sat, 25 Jul 2026 - justtwogoodoldboys.com"
+    - generic [ref=e164] [cursor=pointer]:
+      - generic [ref=e165]: 5:18:33
+      - generic [ref=e166]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e167] [cursor=pointer]:
+      - generic [ref=e168]: 5:13:26
+      - generic [ref=e169]: Ramova - Fix Ya Glasses, Strut Yo Stuff
+    - generic [ref=e170] [cursor=pointer]:
+      - generic [ref=e171]: 5:13:14
+      - generic [ref=e172]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e173] [cursor=pointer]:
+      - generic [ref=e174]: 4:08:16
+      - generic [ref=e175]: "Congressional Dish #341: \"Land Grabs and Cages - CD341\" - Sun, 12 Jul 2026 - Jennifer Briney"
+    - generic [ref=e176] [cursor=pointer]:
+      - generic [ref=e177]: 4:08:06
+      - generic [ref=e178]: voidzero - § No Agenda Live - High quality podcasts - You
+    - generic [ref=e179] [cursor=pointer]:
+      - generic [ref=e180]: 4:05:33
+      - generic [ref=e181]: Cletus Got Shot - American Dream
+    - generic [ref=e182] [cursor=pointer]:
+      - generic [ref=e183]: 4:05:17
+      - generic [ref=e184]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e185] [cursor=pointer]:
+      - generic [ref=e186]: 2:27:35
+      - generic [ref=e187]: "Who Are These Broadcasters? #156: \"Lucy Tightbox Defends Taco Bell (featuring Cayley & Karl)\" - Wed, 22 Jul 2026 - whoarethese.com"
+    - generic [ref=e188] [cursor=pointer]:
+      - generic [ref=e189]: 2:24:57
+      - generic [ref=e190]: Antarctigo Vespucci - No Bad Memories
+    - generic [ref=e191] [cursor=pointer]:
+      - generic [ref=e192]: 10:58:48
+      - generic [ref=e193]: "Behind the Sch3m3s: \"S02E47: Bad!\" - Tue, 14 Jul 2026 - behindthesch3m3s.com"
+    - generic [ref=e194] [cursor=pointer]:
+      - generic [ref=e195]: 10:58:33
+      - generic [ref=e196]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e197] [cursor=pointer]:
+      - generic [ref=e198]: 10:55:31
+      - generic [ref=e199]: Ben Walker - Bubble Bath World
+    - generic [ref=e200] [cursor=pointer]:
+      - generic [ref=e201]: 10:55:10
+      - generic [ref=e202]: "No Agenda #1888: \"In The Mourning\" - Fri, 24 Jul 2026 - Adam Curry & John C. Dvorak"
+    - generic [ref=e203] [cursor=pointer]:
+      - generic [ref=e204]: 7:58:51
+      - generic [ref=e205]: Now offering masterclasses in WTF 101! Ep 248 is coming in!! || LIVESTREAM ON || LISTEN LIVE MOANDAZE NIGHTS 730p 930c 1030e http://scream.behindthesch3m3s.com/radio/8000/.mp3 || LEAVE A SCR33M MAIL 612-263-7999 (SXXY) || http://BadRadio.Live || SHOW NOTES || https://zososcorner.substack.com/p/s02e48 || TAROT GUIDE || https://tarotx.net/
+    - generic [ref=e206] [cursor=pointer]:
+      - generic [ref=e207]: 6:20:09
+      - generic [ref=e208]: "No Agenda #1888: \"In The Mourning\" - Fri, 24 Jul 2026 - Adam Curry & John C. Dvorak"
+    - generic [ref=e209] [cursor=pointer]:
+      - generic [ref=e210]: 6:20:01
+      - generic [ref=e211]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e212] [cursor=pointer]:
+      - generic [ref=e213]: 6:15:32
+      - generic [ref=e214]: "Professor Kliq - Bust This Bust That -Creative Commons music: As played by RynoTheBearded @ ryno.cc"
+    - generic [ref=e215] [cursor=pointer]:
+      - generic [ref=e216]: 6:15:21
+      - generic [ref=e217]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e218] [cursor=pointer]:
+      - generic [ref=e219]: 3:26:40
+      - generic [ref=e220]: "Nick the Rat: \"CANNOT PARSE TITLE: {{RIP John C. Dvorak}}\" - Wed, 22 Jul 2026 - nicktheratradio.com"
+    - generic [ref=e221] [cursor=pointer]:
+      - generic [ref=e222]: 3:26:31
+      - generic [ref=e223]: Â§ All Talk. No Commercials. No Agenda.
+    - generic [ref=e224] [cursor=pointer]:
+      - generic [ref=e225]: 3:22:25
+      - generic [ref=e226]: Ben Walker - Turn It Off And Turn It On Again (Ballad of the I.T. Guy)
+    - generic [ref=e227] [cursor=pointer]:
+      - generic [ref=e228]: 1:51:30
+      - generic [ref=e229]: "Grimerica #772: \"#772 - Mark England - Enlifted - Change Your Words Change Your Life\" - Wed, 22 Jul 2026 - grimerica.ca"
+    - generic [ref=e230] [cursor=pointer]:
+      - generic [ref=e231]: 1:51:20
+      - generic [ref=e232]: Â§ No Agenda - Where Freedom Lives and Censorship Comes to Die
+    - generic [ref=e233] [cursor=pointer]:
+      - generic [ref=e234]: 1:48:20
+      - generic [ref=e235]: Cullah - I Got A Plan To Rule The World
+    - generic [ref=e236] [cursor=pointer]:
+      - generic [ref=e237]: 1:48:11
+      - generic [ref=e238]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e239] [cursor=pointer]:
+      - generic [ref=e240]: 12:44:13
+      - generic [ref=e241]: "DH Unplugged #810: \"Big Blew Up\" - Wed, 15 Jul 2026 - Andrew Horowitz & John C. Dvorak"
+    - generic [ref=e242] [cursor=pointer]:
+      - generic [ref=e243]: 12:43:56
+      - generic [ref=e244]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e245] [cursor=pointer]:
+      - generic [ref=e246]: 12:39:26
+      - generic [ref=e247]: "We Are Castor-Eskimo -Creative Commons music: As played by RynoTheBearded @ ryno.cc"
+    - generic [ref=e248] [cursor=pointer]:
+      - generic [ref=e249]: 11:12:59
+      - generic [ref=e250]: "Disaffected: \"The Karmelo Conspiracy-Ep 283, July 19, 2026\" - Mon, 20 Jul 2026 - Joshua Slocum"
+    - generic [ref=e251] [cursor=pointer]:
+      - generic [ref=e252]: 11:08:31
+      - generic [ref=e253]: Radio Nowhere - Molotov Heart
+    - generic [ref=e254] [cursor=pointer]:
+      - generic [ref=e255]: 8:54:08
+      - generic [ref=e256]: "Millennial Media Offensive: \"MMO #228 - Spicy White\" - Wed, 22 Jul 2026 - mmo.show"
+    - generic [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: 8:53:58
+      - generic [ref=e259]: voidzero - § No Agenda Live - High quality podcasts - You
+    - generic [ref=e260] [cursor=pointer]:
+      - generic [ref=e261]: 8:50:58
+      - generic [ref=e262]: Stuart Ross - The Beaver Parable
+    - generic [ref=e263] [cursor=pointer]:
+      - generic [ref=e264]: 8:50:41
+      - generic [ref=e265]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e266] [cursor=pointer]:
+      - generic [ref=e267]: 7:50:23
+      - generic [ref=e268]: "Bowl After Bowl #448: \"I Love You Boys\" - Wed, 22 Jul 2026 - Sir Spencer and Dame Laurien"
+    - generic [ref=e269] [cursor=pointer]:
+      - generic [ref=e270]: 3:50:23
+      - generic [ref=e271]: "Bowl After Bowl #448: \"I Love You Boys\" - Wed, 22 Jul 2026 - Sir Spencer and Dame Laurien"
+    - generic [ref=e272] [cursor=pointer]:
+      - generic [ref=e273]: 3:50:13
+      - generic [ref=e274]: Â§ No Agenda - Where Freedom Lives and Censorship Comes to Die
+    - generic [ref=e275] [cursor=pointer]:
+      - generic [ref=e276]: 3:46:17
+      - generic [ref=e277]: Jon Worthy and the Bends - Help Me
+    - generic [ref=e278] [cursor=pointer]:
+      - generic [ref=e279]: 3:46:08
+      - generic [ref=e280]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e281] [cursor=pointer]:
+      - generic [ref=e282]: 2:08:11
+      - generic [ref=e283]: "Canary Cry News Talk: \"BEAST MARK with Dr. Joye Jeffries Pugh | CCR 198\" - Sat, 25 Jul 2026 - canarycryradio.com"
+    - generic [ref=e284] [cursor=pointer]:
+      - generic [ref=e285]: 2:07:55
+      - generic [ref=e286]: Â§ Xindu - The No Agenda Stream
+    - generic [ref=e287] [cursor=pointer]:
+      - generic [ref=e288]: 2:02:26
+      - generic [ref=e289]: Radio Nowhere - Mission Control II [4x4]
+    - generic [ref=e290] [cursor=pointer]:
+      - generic [ref=e291]: 1:49:45
+      - generic [ref=e292]: "Mere Mortals Book Reviews: \"I Read Elon Musk"
+    - generic [ref=e293] [cursor=pointer]:
+      - generic [ref=e294]: 1:49:30
+      - generic [ref=e295]: Â§ Nick The Rat - The No Agenda Stream
+    - generic [ref=e296] [cursor=pointer]:
+      - generic [ref=e297]: 1:46:47
+      - generic [ref=e298]: The Gunshy - No Gods, No Bastards
+    - generic [ref=e299] [cursor=pointer]:
+      - generic [ref=e300]: 1:46:38
+      - generic [ref=e301]: Â§ All Talk. No Commercials. No Agenda.
+    - generic [ref=e302] [cursor=pointer]:
+      - generic [ref=e303]: 11:40:42
+      - generic [ref=e304]: "Unrelenting #198: \"Magic Pixel\" - Fri, 24 Jul 2026 - Gene Naftulyev & Darren O"
+    - generic [ref=e305] [cursor=pointer]:
+      - generic [ref=e306]: 11:40:32
+      - generic [ref=e307]: § Roderick Veelo - Podcasts around the world. This is the No Agenda Stream.
+    - generic [ref=e308] [cursor=pointer]:
+      - generic [ref=e309]: 11:36:32
+      - generic [ref=e310]: Shearer - I
+    - generic [ref=e311] [cursor=pointer]:
+      - generic [ref=e312]: 11:36:20
+      - generic [ref=e313]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e314] [cursor=pointer]:
+      - generic [ref=e315]: 9:17:14
+      - generic [ref=e316]: "Planet Rage #230: \"John C. Dvorak Is Wrong\" - Mon, 20 Jul 2026 - Larry Bleidner & Darren O"
+    - generic [ref=e317] [cursor=pointer]:
+      - generic [ref=e318]: 9:12:53
+      - generic [ref=e319]: Vienna Ditto - The Undefeated
+    - generic [ref=e320] [cursor=pointer]:
+      - generic [ref=e321]: 9:12:39
+      - generic [ref=e322]: Â§ Nick The Rat - The No Agenda Stream
+    - generic [ref=e323] [cursor=pointer]:
+      - generic [ref=e324]: 8:47:04
+      - generic [ref=e325]: "A Walk Through the Mind: \"Building & Controlling Waterways\" - Tue, 23 Jun 2026 - billybon3s.com"
+    - generic [ref=e326] [cursor=pointer]:
+      - generic [ref=e327]: 8:45:31
+      - generic [ref=e328]: Mike Phirman - Chicken Monkey Duck
+    - generic [ref=e329] [cursor=pointer]:
+      - generic [ref=e330]: 6:42:49
+      - generic [ref=e331]: "Our Big Dumb Mouth #1409: \"Data Center Revolt | Rogue AI | Goldfish Rights\" - Sat, 25 Jul 2026 - ourbigdumbmouth.com"
+    - generic [ref=e332] [cursor=pointer]:
+      - generic [ref=e333]: 6:42:37
+      - generic [ref=e334]: Â§ Nick The Rat - The Best Stream in All Streamdoms
+    - generic [ref=e335] [cursor=pointer]:
+      - generic [ref=e336]: 4:59:51
+      - generic [ref=e337]: No Agenda Episode 1889 Live!
+    - generic [ref=e338] [cursor=pointer]:
+      - generic [ref=e339]: 12:59:50
+      - generic [ref=e340]: No Agenda Episode 1889 Live!
+    - generic [ref=e341] [cursor=pointer]:
+      - generic [ref=e342]: 11:13:02
+      - generic [ref=e343]: "LIVE: No Agenda, ep. #1889 - Adam Curry & John C. Dvorak"
+    - generic [ref=e344] [cursor=pointer]:
+      - generic [ref=e345]: 9:04:15
+      - generic [ref=e346]: No Agenda Rock
+  - generic [ref=e12]: 5:26:43 AM
+  - generic [ref=e13]: Wed Jul 29
+  - slider [ref=e15] [cursor=pointer]: "101"
+  - generic [ref=e16]:
+    - button "-30s" [ref=e17] [cursor=pointer]
+    - button "-10m" [ref=e18] [cursor=pointer]
+    - button "-1h" [ref=e19] [cursor=pointer]
+    - button "+30s" [ref=e20] [cursor=pointer]
+    - button "+10m" [ref=e21] [cursor=pointer]
+    - button "+1h" [ref=e22] [cursor=pointer]
+  - generic [ref=e23]:
+    - button "Previous track" [ref=e24] [cursor=pointer]
+    - button "Play/Pause" [ref=e27] [cursor=pointer]
+    - button "Next track" [ref=e30] [cursor=pointer]
+    - button "Go to live" [ref=e33] [cursor=pointer]
+  - generic [ref=e36]: v1.4.3

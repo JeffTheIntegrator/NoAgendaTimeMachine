@@ -1,4 +1,4 @@
-# Release v1.5.1 - Bug Fix: Infinite Reload Loop (Excessive Data Transfer)
+# Release v1.5.2 - Bug Fix: Infinite Reload Loop (Excessive Data Transfer)
 
 **Date:** 2026-07-29
 
@@ -12,7 +12,7 @@
 - User clicks hamburger menu and selects a segment
 - Player switches from playerA to playerB (or vice versa)
 - The inactive player enters infinite loop: LOAD_START → METADATA_LOADED → "Play aborted by new load request" → repeat
-- Same audio file downloaded repeatedly (segment 117 with duration 103s → 465s as file grew)
+- Same audio file downloaded repeatedly
 
 **Root Cause**:
 - `playSegment()` sets up event handlers (`onloadedmetadata`, `onerror`) on the active player
@@ -27,20 +27,21 @@
 
 **Example sequence**:
 1. PlayerA was playing segment 117 (live segment) with event handlers attached
-2. User clicked hamburger and selected segment 105
+2. User clicked hamburger and selected segment 111
 3. `switchPlayer()` toggled to playerB
-4. `playSegment(105, ...)` set up new handlers on playerB
+4. `playSegment(111, ...)` set up new handlers on playerB
 5. PlayerA's old handlers were STILL ATTACHED (never cleared)
 6. PlayerB's metadata loaded → `preloadNext()` called
-7. `preloadNext()` set `playerA.src = segments[106].url`
+7. `preloadNext()` set `playerA.src = segments[112].url`
 8. **This triggered playerA's stale `onloadedmetadata` handler**
-9. That handler called `playSegment(117, ...)` with OLD closure values
+9. That handler called `playSegment()` with OLD closure values
 10. Infinite loop began
 
 **Fix**:
 - Clear event handlers (`onloadedmetadata`, `onerror`) on BOTH players when switching
+- Clear pending metadata timeouts when switching players
+- Track timeouts per player to prevent orphaned callbacks
 - This ensures `preloadNext()` cannot trigger stale callbacks
-- Timeout clearing also retained for additional safety
 
 **Technical Details**:
 ```javascript
@@ -69,7 +70,7 @@ const switchPlayer = () => {
 
 **Testing**:
 - 67 regression tests passing
-- Fix verified against TestResult0014 (infinite reload loop scenario)
+- Fix verified against TestResult0015 (infinite reload loop scenario)
 - Manual testing: Navigate via hamburger menu, verify no repeated downloads in DevTools Network tab
 
 **Impact**:
@@ -81,14 +82,14 @@ const switchPlayer = () => {
 
 Copy files to `/var/www/html/noAgendaTimeMachine/`:
 ```bash
-cp -r release/v1.5.1/* /var/www/html/noAgendaTimeMachine/
+cp -r release/v1.5.2/* /var/www/html/noAgendaTimeMachine/
 ```
 
 ## Migration Notes
 
 - No configuration changes required
 - No API changes
-- Drop-in replacement for v1.5.0
+- Drop-in replacement for v1.5.1
 - All 15 features remain intact
 
 ## Known Issues
@@ -97,6 +98,7 @@ cp -r release/v1.5.1/* /var/www/html/noAgendaTimeMachine/
 
 ## Previous Releases
 
+- v1.5.1: UI version update only (fix was in release folder but not committed)
 - v1.5.0: Hamburger segment list (10 new tests, 67 total)
 - v1.4.3: Slider improvements (10 new tests)
 - v1.4.2: Additional refinements

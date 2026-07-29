@@ -1,0 +1,37 @@
+- tablist [ref=f2e3]:
+  - text:    
+  - tabpanel "Livestream" [ref=f2e4]:
+    - button "Toggle channel list" [ref=f2e6] [cursor=pointer]: 
+    - generic [ref=f2e7]:
+      - heading "No Agenda Stream" [level=1] [ref=f2e9]
+      - paragraph [ref=f2e10]: Welcome to the stream that's all talk, no commercials. No Agenda.
+      - paragraph [ref=f2e11]:
+        - link " Learn more" [ref=f2e12] [cursor=pointer]:
+          - /url: "#/information"
+      - generic [ref=f2e13]:
+        - generic [ref=f2e14]:
+          - button "Start playing livestream" [ref=f2e15] [cursor=pointer]: 
+          - generic [ref=f2e16] [cursor=pointer]: No Agenda Stream
+          - link "" [ref=f2e17] [cursor=pointer]:
+            - /url: https://listen.noagendastream.com/noagenda?type=.mp3
+        - generic [ref=f2e18]: Loading stream data...
+      - generic [ref=f2e19]:
+        - generic [ref=f2e20]:
+          - button "Start playing livestream" [ref=f2e21] [cursor=pointer]: 
+          - generic [ref=f2e22] [cursor=pointer]: No Agenda Stream v4v Music
+          - link "" [ref=f2e23] [cursor=pointer]:
+            - /url: https://listen.noagendastream.com/v4vmusic?type=.mp3
+        - generic [ref=f2e24]: Loading stream data...
+      - paragraph [ref=f2e25]: No Agenda Stream is part of the No Agenda network.
+      - paragraph [ref=f2e26]:
+        - link " No Agenda Show" [ref=f2e27] [cursor=pointer]:
+          - /url: https://www.noagendashow.net
+      - paragraph [ref=f2e28]:
+        - link " No Agenda Donations" [ref=f2e29] [cursor=pointer]:
+          - /url: https://www.noagendadonations.com
+      - heading "Troll Room" [level=2] [ref=f2e30]
+      - link "Connect to the Troll Room" [ref=f2e31] [cursor=pointer]:
+        - /url: "#/connect"
+      - paragraph [ref=f2e32]:
+        - link " Learn more" [ref=f2e33] [cursor=pointer]:
+          - /url: "#/information"

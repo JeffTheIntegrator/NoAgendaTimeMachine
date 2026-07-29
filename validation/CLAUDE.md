@@ -216,7 +216,7 @@ audio/segments/*.mp3 → plays audio
 
 ### Feature Implementation Status
 
-**Completed Features (14 total, 13 complete as of v1.4.0):**
+**Completed Features (15 total, 14 complete as of v1.4.3):**
 
 | # | Feature | Description | Status | Date |
 |---|---------|-------------|--------|------|
@@ -233,6 +233,7 @@ audio/segments/*.mp3 → plays audio
 | **11** | Match CSS formatting | Match CSS formatting from https://noagenda.stream/#/livestream | ✅ Complete | 2026-07-11 |
 | **12** | Remaining validation | Complete Bug 3 validation test, all bugs validated | ✅ Complete | 2026-07-11 |
 | **13** | Slider drag updates title | As slider is dragged, title updates to segment at dragged position | ✅ Complete | 2026-07-12 |
+| **14a** | Slider improvements | Segment-based slider, button swap, remove time labels | ✅ Complete | 2026-07-28 |
 | **14** | Hamburger segment list | Add hamburger button with scrollable segment list | ⏳ Pending | - |
 
 **Simplification (v1.4.0):**
@@ -256,8 +257,16 @@ audio/segments/*.mp3 → plays audio
 - **Feature #11 (Match CSS formatting):** Converted from dark theme to light theme matching NoAgenda.stream
 - **Feature #12 (Bug 3 validation):** Created bug3.spec.js with 8 tests validating Next Track button fix
 - **Feature #13 (Slider drag updates title) - v1.4.0:** As slider dragged, title updates to segment at dragged position via `segIndexForTime()`, 3 lines in input handler, 7 Playwright tests
+- **Feature #14a (Slider improvements) - v1.4.3:**
+  - Segment-index-based slider for finer control (min=0, max=segments.length-1)
+  - Title sync solved via 1:1 segment mapping (no repeats during drag)
+  - Button order: -30s, -10m, -1h, +30s, +10m, +1h
+  - Removed time labels below timeline (.time-labels HTML/CSS, UI.startTime/UI.endTime)
+  - Input handler: Direct segment index lookup instead of segIndexForTime(timestamp)
+  - Heartbeat: Sets slider to currentIndex instead of currentTime
+  - Validated with 10 Playwright tests, all 57 regression tests passing
 
-**Regression Tests:** 45 Playwright tests, all passing (v1.4.0)
+**Regression Tests:** 57 Playwright tests, all passing (v1.4.3)
 
 ### Known Issues & Considerations
 

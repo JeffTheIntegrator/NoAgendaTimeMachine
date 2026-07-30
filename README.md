@@ -2,9 +2,9 @@
 
 A Python-based DVR for the No Agenda stream with time-shifted web playback.
 
-![Version](https://img.shields.io/badge/version-v1.5.2-blue)
+![Version](https://img.shields.io/badge/version-v1.5.3-blue)
 ![Status](https://img.shields.io/badge/status-production--ready-green)
-![Tests](https://img.shields.io/badge/tests-67%20passing-success)
+![Tests](https://img.shields.io/badge/tests-66%20passing-success)
 
 ## Overview
 
@@ -14,7 +14,7 @@ A Python-based DVR for the No Agenda stream with time-shifted web playback.
 
 ## Features
 
-All 15 planned features complete as of v1.5.2:
+All 15 planned features complete as of v1.5.3:
 
 | # | Feature | Description |
 |---|---------|-------------|
@@ -56,7 +56,7 @@ All 15 planned features complete as of v1.5.2:
 sudo mkdir -p /var/www/html/noAgendaTimeMachine/audio/segments
 
 # Copy files from latest release
-cp -r release/v1.5.2/* /var/www/html/noAgendaTimeMachine/
+cp -r release/v1.5.3/* /var/www/html/noAgendaTimeMachine/
 
 # Set permissions
 sudo chown -R www-data:www-data /var/www/html/noAgendaTimeMachine
@@ -143,7 +143,7 @@ noAgendaTimeMachine/
 ├── TODO.md                            # Feature tracking (15/15 complete)
 ├── .claude/CLAUDE.md                  # Development guidance
 ├── release/                           # Release packages (frozen artifacts)
-│   ├── v1.0.0/ through v1.5.2/       # Versioned releases
+│   ├── v1.0.0/ through v1.5.3/       # Versioned releases
 │   └── README.md
 ├── validation/                        # Development & canonical source
 │   ├── production/                    # CANONICAL SOURCE (edit here)
@@ -164,7 +164,7 @@ noAgendaTimeMachine/
 
 ## Testing
 
-**67 Playwright regression tests, all passing**:
+**66 Playwright regression tests, all passing**:
 
 - feature2.spec.js (5 tests) - 12-hour clock format
 - feature6.spec.js (7 tests) - Live button
@@ -186,11 +186,11 @@ npx playwright test --reporter=list
 
 | Component | Status |
 |-----------|--------|
-| Bug Fixes | ✅ Complete (4/4) |
+| Bug Fixes | ✅ Complete (6/6) |
 | Features | ✅ Complete (15/15) |
 | Production Ready | ✅ Yes |
 
-**Latest Version**: v1.5.2 (2026-07-29)
+**Latest Version**: v1.5.3 (2026-07-30)
 
 **Version History**:
 - v1.0.0 (2026-07-11): Initial production release
@@ -202,12 +202,15 @@ npx playwright test --reporter=list
 - v1.5.0 (2026-07-29): Hamburger segment list (67 tests)
 - v1.5.1 (2026-07-29): Playback stall fix
 - v1.5.2 (2026-07-29): Infinite reload loop fix
+- v1.5.3 (2026-07-30): Time display stalled & playback skip fixes
 
 **Fixed Bugs**:
 1. ✅ Live Edge Stalling - Audio stops while UI shows playing
 2. ✅ Previous Track Freezing - Audio freezes after clicking previous track
 3. ✅ Next Track Button - Does not advance to next segment
 4. ✅ Infinite Reload Loop - 130MB/s data transfer after hamburger navigation
+5. ✅ Time Display Stalled - Time freezes while audio continues playing
+6. ✅ Playback Skip During Live Reload - Audio skips back ~30s at live edge
 
 ## Development
 

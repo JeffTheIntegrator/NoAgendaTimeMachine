@@ -2,63 +2,110 @@
 
 A Python-based DVR for the No Agenda stream with time-shifted web playback.
 
+![Version](https://img.shields.io/badge/version-v1.5.2-blue)
+![Status](https://img.shields.io/badge/status-production--ready-green)
+![Tests](https://img.shields.io/badge/tests-67%20passing-success)
+
+## Overview
+
+**No Agenda Time Machine** is a 24/7 DVR for the [No Agenda stream](https://noagendastream.com/). Like a DVR for radio, it continuously records the live stream and lets you rewind and listen to any point in the last 72 hours through a clean web interface.
+
+**Key Concept**: Time-shifted playback - jump back to hear what you missed, skip past commercials, or replay your favorite segments.
+
 ## Features
 
-- **Continuous Stream Recording**: Captures the No Agenda ICY audio stream 24/7
-- **Automatic Segmentation**: Splits recording into MP3 segments based on metadata changes
-- **Time-Shifted Playback**: Web player lets you jump back and listen to any point in the last 72 hours
-- **Static HTML Player**: No backend required – pure JavaScript in the browser
-- **12-Hour Time Format**: Clean, readable time display with date (e.g., "9:30:15 AM" on "Sat Jul 11")
-- **Dual-Buffer Audio**: Smooth segment transitions with A/B player architecture
-- **Live Edge Handling**: Automatically stays near the live stream with 30-second offset
+All 15 planned features complete as of v1.5.2:
 
-## Architecture
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | Remove green bar | Clean timeline without buffer indicator |
+| 2 | 12-hour clock format | Time with AM/PM + date (e.g., "9:30:15 AM" on "Sat Jul 11") |
+| 3 | Fixed title height | Reserved 3-row space prevents button shifting |
+| 4 | Prevent page zoom | Mobile-friendly, no zoom on double-tap |
+| 5 | Remove status text | Cleaner UI without "Playing"/"Paused" |
+| 6 | Live button | One-click jump to near-live playback |
+| 7 | Updated branding | "No Agenda Time Machine" heading |
+| 8 | White button text | High-contrast controls (white on gold) |
+| 9 | Equal button sizes | All 64×64px for consistent touch targets |
+| 10 | Larger slider | 28px thumb for mobile touch interaction |
+| 11 | Light theme | Matches NoAgenda.stream color palette |
+| 12 | Bug validation | Complete regression test suite |
+| 13 | Slider drag preview | Title shows segment at dragged position |
+| 14a | Slider improvements | Segment-based slider with finer control |
+| 14 | Hamburger menu | Dropdown panel showing all segments |
 
-```
-Python Recorder (recorderd.py)
-    ↓ writes
-/var/www/html/noAgendaTimeMachine/
-    ├── playlist.json          # Segment list
-    └── audio/segments/
-        ├── track_*.mp3        # Audio files
-        └── track_*.json       # Metadata sidecars
+**Core Capabilities**:
+- **Continuous 24/7 recording** of No Agenda ICY stream
+- **Automatic segmentation** based on metadata (StreamTitle) changes
+- **72-hour retention** of audio segments
+- **Dual-buffer audio** for smooth segment transitions
+- **Live edge handling** with fixed 30-second offset
 
-Browser (index.html)
-    ↓ fetches
-playlist.json → segments/*.json → segments/*.mp3 → Audio playback
-```
+## Quick Start
 
-## Requirements
+### Requirements
 
 - Python 3.8+
 - screen (for detached session management)
 - Web server (nginx, apache, or Python's http.server)
 
-## Installation
-
-### 1. Clone or Copy Files
+### Quick Deploy (from release package)
 
 ```bash
 # Create deployment directory
 sudo mkdir -p /var/www/html/noAgendaTimeMachine/audio/segments
 
-# Copy files
-cp index.html /var/www/html/noAgendaTimeMachine/
-cp noAgendaTimeMachine.py /var/www/html/noAgendaTimeMachine/audio/recorderd.py
-cp start.sh /var/www/html/noAgendaTimeMachine/audio/
-```
+# Copy files from latest release
+cp -r release/v1.5.2/* /var/www/html/noAgendaTimeMachine/
 
-### 2. Configure Permissions
-
-```bash
-# Set ownership
+# Set permissions
 sudo chown -R www-data:www-data /var/www/html/noAgendaTimeMachine
-
-# Make scripts executable
 chmod +x /var/www/html/noAgendaTimeMachine/audio/*.sh
+
+# Start the recorder
+cd /var/www/html/noAgendaTimeMachine/audio
+./start.sh
 ```
 
-### 3. Configure the Recorder
+### Access the Web Player
+
+Navigate to: `http://your-server/noAgendaTimeMachine/`
+
+**Player Controls:**
+- ▶️ Play/Pause
+- ⏮️ Previous track
+- ⏭️ Next track
+- Seek slider - drag to any position
+- Jump buttons: -1h, -10m, -30s, +30s, +10m, +1h
+- Live button - jump near live
+- ☰ Hamburger menu - segment list
+
+## Architecture
+
+```
+Python Recorder (recorderd.py - 385 lines)
+    writes
+/var/www/html/noAgendaTimeMachine/
+    ├── playlist.json          # Segment list (minimal state)
+    └── audio/segments/
+        ├── track_*.mp3        # Audio files
+        └── track_*.json       # Metadata sidecars
+
+Browser (index.html - ~680 lines)
+    fetches
+playlist.json → segments/*.json → segments/*.mp3 → Audio playback
+```
+
+**Data Flow**:
+1. Python connects to ICY stream with `Icy-MetaData: 1` header
+2. Reads audio chunks, parses metadata for title changes
+3. On metadata change: closes current segment, opens new one
+4. Writes MP3 + JSON sidecar (start/end/title/final flags)
+5. Updates playlist.json every 5 seconds
+6. Frontend fetches playlist and sidecar JSON files
+7. Dual-buffer players (playerA/playerB) alternate for smooth transitions
+
+## Configuration
 
 Edit `/var/www/html/noAgendaTimeMachine/audio/recorderd.py`:
 
@@ -70,16 +117,12 @@ MAX_CHUNK_DUR = 4 * 3600      # 4 hours max per segment
 METADATA_IGNORE_MIN = 5        # Ignore title flips < 5s
 ```
 
-## Usage
+**Frontend constants** (in `index.html`):
+- `LIVE_EDGE_OFFSET`: 30 seconds (fixed offset from live edge)
+- `PLAYLIST_URL`: `'playlist.json'`
+- `POLL_INTERVAL`: 5000ms (5 seconds)
 
-### Starting the Recorder
-
-```bash
-cd /var/www/html/noAgendaTimeMachine/audio
-./start.sh
-```
-
-### Managing the Screen Session
+## Managing the Recorder
 
 ```bash
 # Attach to view logs
@@ -92,95 +135,89 @@ screen -r noagendarecorder
 screen -S noagendarecorder -X quit
 ```
 
-### Accessing the Web Player
-
-Open your browser to: `http://your-server/noAgendaTimeMachine/`
-
-**Player Controls:**
-- ▶️ Play/Pause button
-- ⏮️ Previous track (seeks to start of current or previous segment)
-- ⏭️ Next track (advances to next segment)
-- Seek slider - drag to any position in the timeline
-- Jump buttons: -1h, -10m, -30s, +30s, +10m, +1h
-
 ## Project Structure
 
 ```
 noAgendaTimeMachine/
-├── README.md
-├── TODO.md                  # Feature tracking
-├── .gitignore
-├── .claude/                 # Claude Code configuration
-│   └── CLAUDE.md
-├── validation/              # Development/validation directory
-│   ├── index.html           # Web player (source)
-│   ├── noAgendaTimeMachine.py
-│   ├── start.sh
-│   ├── production/          # Deployment package
-│   │   ├── index.html
-│   │   └── audio/
-│   │       ├── recorderd.py
-│   │       └── start.sh
-│   ├── tests/               # Test files
-│   └── docs/                # Design documentation
-└── test_validation/         # Playwright browser tests
+├── README.md                          # This file
+├── TODO.md                            # Feature tracking (15/15 complete)
+├── .claude/CLAUDE.md                  # Development guidance
+├── release/                           # Release packages (frozen artifacts)
+│   ├── v1.0.0/ through v1.5.2/       # Versioned releases
+│   └── README.md
+├── validation/                        # Development & canonical source
+│   ├── production/                    # CANONICAL SOURCE (edit here)
+│   │   ├── index.html                 # THE frontend (~680 lines)
+│   │   ├── audio/
+│   │   │   ├── recorderd.py           # THE recorder (385 lines)
+│   │   │   └── start.sh               # THE launcher (81 lines)
+│   │   └── docs/                      # Design documentation
+│   ├── TESTING.md                     # Testing report
+│   └── CLAUDE.md                      # Development guide
+└── test_validation/                   # Playwright browser tests
+    ├── index.html → ../validation/production/index.html (symlink)
+    ├── tests/                         # 67 regression tests
+    └── audio/playlist.json            # Test data
 ```
 
-## Development
+**Canonical source**: `validation/production/`
 
-### Local Testing
+## Testing
+
+**67 Playwright regression tests, all passing**:
+
+- feature2.spec.js (5 tests) - 12-hour clock format
+- feature6.spec.js (7 tests) - Live button
+- feature8.spec.js (6 tests) - White button text/icons
+- feature9.spec.js (6 tests) - Equal button sizes
+- feature10.spec.js (6 tests) - Larger slider button
+- bug3.spec.js (8 tests) - Next Track validation
+- feature13.spec.js (7 tests) - Slider drag updates title
+- feature14a.spec.js (10 tests) - Slider improvements
+- feature14.spec.js (10 tests) - Hamburger segment list
 
 ```bash
-cd validation
-python3 noAgendaTimeMachine.py
-
-# Or use screen
-./start.sh
-screen -r noagendarecorder
-```
-
-### Running Tests
-
-```bash
-# Unit tests
-cd validation/tests
-node -e "eval(require('fs').readFileSync('feature2_test.html', 'utf8'))"
-
-# Playwright browser tests
 cd test_validation
-npx playwright test tests/feature2.spec.js
+python3 -m http.server 8081
+npx playwright test --reporter=list
 ```
-
-## Configuration
-
-### Frontend Constants (in `index.html`)
-
-- `LIVE_EDGE_OFFSET`: 30 seconds (fixed offset from live edge)
-- `PLAYLIST_URL`: `'playlist.json'`
-- `POLL_INTERVAL`: 5000ms (5 seconds)
-
-### Backend Constants (in `recorderd.py`)
-
-- `STREAM_URL`: No Agenda stream URL
-- `WEB_DIR`: Web root directory
-- `MAX_AGE`: Segment retention period (default: 72 hours)
-- `MAX_CHUNK_DUR`: Maximum segment duration (default: 4 hours)
 
 ## Status
 
 | Component | Status |
 |-----------|--------|
-| Bug Fixes | ✅ Complete (3/3) |
-| Features | 🚧 In Progress (1/12) |
+| Bug Fixes | ✅ Complete (4/4) |
+| Features | ✅ Complete (15/15) |
 | Production Ready | ✅ Yes |
 
-**Fixed Bugs:**
-- ✅ Live Edge Stalling
-- ✅ Previous Track Freezing
-- ✅ Next Track Button
+**Latest Version**: v1.5.2 (2026-07-29)
 
-**Completed Features:**
-- ✅ Feature #2: 12-hour clock format with date display
+**Version History**:
+- v1.0.0 (2026-07-11): Initial production release
+- v1.1.0 (2026-07-11): Light theme (Feature 11)
+- v1.2.0 (2026-07-11): UI improvements (7 features)
+- v1.3.0 (2026-07-11): Complete feature set (12 features)
+- v1.4.0 (2026-07-12): Feature 13 + simplification (45 tests)
+- v1.4.3 (2026-07-28): Slider improvements (57 tests)
+- v1.5.0 (2026-07-29): Hamburger segment list (67 tests)
+- v1.5.1 (2026-07-29): Playback stall fix
+- v1.5.2 (2026-07-29): Infinite reload loop fix
+
+**Fixed Bugs**:
+1. ✅ Live Edge Stalling - Audio stops while UI shows playing
+2. ✅ Previous Track Freezing - Audio freezes after clicking previous track
+3. ✅ Next Track Button - Does not advance to next segment
+4. ✅ Infinite Reload Loop - 130MB/s data transfer after hamburger navigation
+
+## Development
+
+**Canonical source location**: `/home/jeff/ClaudeCode/noAgendaTimeMachine/validation/production/`
+
+```bash
+# Edit files in validation/production/
+# Test via test_validation/ (symlink to canonical)
+# Deploy from validation/production/ to server
+```
 
 ## License
 
@@ -189,4 +226,8 @@ This project is provided as-is for personal use with the No Agenda stream.
 ## Credits
 
 - Inspired by the [No Agenda Stream](https://noagenda.stream/)
-- Built with Claude Code
+- Built with [Claude Code](https://claude.ai/code)
+
+---
+
+**Repository**: https://github.com/JeffTheIntegrator/NoAgendaTimeMachine

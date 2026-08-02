@@ -12,8 +12,8 @@ NoAgendaTimeMachine is a Python-based DVR for the No Agenda stream. It continuou
 - **Screen launcher** (`start.sh`): Manages recorder in detached screen session
 - **Live edge handling**: Dynamic reloading at the stream's leading edge with fixed 30s offset
 
-**Current Version:** v1.6.0 (Security & quality release) - Released 2026-08-02
-**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.6.0 released
+**Current Version:** v1.6.1 (Extended retention) - Released 2026-08-02
+**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.6.1 released
 
 ## Project Structure
 
@@ -26,7 +26,8 @@ noAgendaTimeMachine/
 │   ├── v1.2.0/                   # UI improvements
 │   ├── v1.3.0/                   # 12 features complete
 │   ├── v1.5.4/                   # Date display in hamburger menu
-│   ├── v1.6.0/                   # Current - Security & quality release
+│   ├── v1.6.0/                   # Security & quality release
+│   ├── v1.6.1/                   # Current - Extended retention (7 days)
 │   │   ├── index.html
 │   │   ├── RELEASE_v1.6.0.md
 │   │   └── audio/
@@ -341,7 +342,7 @@ audio/segments/*.mp3 → plays audio
 - `test_validation/index.html` is now symlink → `../validation/production/index.html` (or copy if symlink unavailable)
 - Release artifacts (`release/v1.*/`) remain frozen and untouched
 
-**Regression Tests:** 76 Playwright tests, all passing (v1.6.0)
+**Regression Tests:** 76 Playwright tests, all passing (v1.6.1)
 
 ### Known Issues & Considerations
 
@@ -567,17 +568,22 @@ npx playwright test --reporter=list
 - ✅ Code review findings from v1.5.4 applied
 - ✅ Release package at `release/v1.6.0/`
 
+### Phase 7: Extended Retention (v1.6.1 - 2026-08-02)
+- ✅ MAX_AGE increased from 72 hours (3 days) to 7 days (168 hours)
+- ✅ Release package at `release/v1.6.1/`
+
 ## Related Files
 
 - **TODO List**: `TODO.md` - Feature requests (13/14 complete for v1.4.0, #14 pending)
-- **Release Notes**: `release/v1.6.0/RELEASE_v1.6.0.md` - v1.6.0 release summary
+- **Release Notes**: `release/v1.6.1/RELEASE_v1.6.1.md` - v1.6.1 release summary
 - **Release Packages**:
   - `release/v1.1.0/` - Light theme
   - `release/v1.2.0/` - UI improvements (7/12)
   - `release/v1.3.0/` - 12 features complete (38 tests)
   - `release/v1.4.0/` - Feature 13 + simplification (45 tests)
   - `release/v1.5.4/` - Date display in hamburger menu (72 tests)
-  - `release/v1.6.0/` - Current - Security & quality release (76 tests)
+  - `release/v1.6.0/` - Security & quality release (76 tests)
+  - `release/v1.6.1/` - Current - Extended retention, 7 days (76 tests)
 - **Design Document**: `validation/production/docs/2025-07-04-no-agenda-time-machine-production-design.md`
 - **Testing Report**: `validation/TESTING.md`
 - **Code Review**: `validation/CODE_REVIEW.md` — v1.5.4 review, findings applied in v1.6.0
@@ -586,8 +592,8 @@ npx playwright test --reporter=list
 
 ### Quick Reference
 
-- **Current Release**: `release/v1.6.0/` - Security & quality release, 76 tests passing
-- **Current Version**: v1.6.0 (2026-08-02)
+- **Current Release**: `release/v1.6.1/` - Extended retention (7 days), 76 tests passing
+- **Current Version**: v1.6.1 (2026-08-02)
 - **Bug Validation**: All 6 bugs fixed and validated
 - **Code Review**: v1.5.4 review complete — all findings applied in v1.6.0
 - **Features Implemented** (15/15):

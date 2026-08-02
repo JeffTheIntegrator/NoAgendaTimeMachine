@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>No Agenda Time Machine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Match NoAgenda.stream color palette */
+            --body-bg: #415364;
+            --card-bg: #fff;
+            --text-primary: #222;
+            --text-muted: #767676;
+            --accent: #b08c4f;
+            --link: #77abd9;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif, BlinkMacSystemFont, 'Helvetica Neue', Arial;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            touch-action: pan-y;
+        }
+
+        .player-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .track-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            min-height: 72px;
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .status-indicator {
+            text-align: center;
+            font-size: 12px;
+            min-height: 18px;
+            margin-top: 4px;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+        .status-indicator.error { color: var(--danger); }
+        .status-indicator.recovering { color: var(--accent); }
+
+        /* Time Display */
+        .time-display {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 48px;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-primary);
+            margin: 24px 0 0 0;
+            letter-spacing: 0.05em;
+        }
+
+        .date-display {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 4px 0 24px 0;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: relative;
+            margin: 24px 0;
+        }
+
+        .timeline {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .timeline::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 0 10px rgba(176, 140, 79, 0.4);
+            transition: transform 0.1s ease;
+        }
+
+        .timeline::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+            cursor: grabbing;
+        }
+
+        .timeline::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 0 10px rgba(176, 140, 79, 0.4);
+        }
+
+
+        /* Jump Controls */
+        .jump-controls {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .jump-btn {
+            background: var(--accent);
+            border: 1px solid transparent;
+            color: #fff;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .jump-btn:hover {
+            background: var(--link);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .jump-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Main Controls */
+        .main-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .control-btn {
+            background: var(--accent);
+            border: 1px solid transparent;
+            color: #fff;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .control-btn:hover {
+            background: var(--link);
+            color: #fff;
+        }
+
+        .play-btn {
+            width: 64px;
+            height: 64px;
+            background: var(--accent);
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .play-btn:hover {
+            background: #8f7242;
+            color: var(--text-primary);
+        }
+
+        .live-btn {
+            background: var(--link);
+            border: none;
+        }
+
+        .live-btn:hover {
+            background: #5a8cb7;
+        }
+
+        .hamburger-btn {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 8px;
+            transition: color 0.15s ease;
+        }
+
+        .hamburger-btn:hover {
+            color: var(--link);
+        }
+
+        .hamburger-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .segment-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 32px;
+            width: 320px;
+            max-height: 400px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: none;
+            z-index: 50;
+        }
+
+        .segment-dropdown.show {
+            display: block;
+        }
+
+        .segment-list {
+            max-height: 380px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .segment-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .segment-item:hover {
+            background: #f5f5f5;
+        }
+
+        .segment-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .segment-item-title {
+            font-size: 14px;
+            color: var(--text-primary);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Scrollbar styling for segment list */
+        .segment-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .segment-list::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .segment-list::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        .segment-list::-webkit-scrollbar-thumb:hover {
+            background: var(--text-primary);
+        }
+
+        /* Start Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(65, 83, 100, 0.95);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay h2 {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        .overlay-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .overlay-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Icons */
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .player-card {
+                padding: 24px;
+            }
+
+            .time-display {
+                font-size: 36px;
+            }
+
+            .date-display {
+                font-size: 12px;
+            }
+
+            .jump-controls {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus visible for accessibility */
+        button:focus-visible,
+        .timeline:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-card">
+        <div class="overlay" id="overlay">
+            <h2>No Agenda Time Machine</h2>
+            <button class="overlay-btn">▶ Start Player</button>
+        </div>
+
+        <div class="header">
+            <div class="logo">No Agenda Time Machine</div>
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Segment list">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+            </button>
+            <div class="track-title" id="track-title">Loading stream...</div>
+            <div class="status-indicator" id="status-indicator" aria-live="polite"></div>
+        </div>
+
+        <div class="segment-dropdown" id="segment-dropdown">
+            <div class="segment-list" id="segment-list">
+                <!-- Segments populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="time-display" id="time-display">--:--:--</div>
+        <div class="date-display" id="date-display"></div>
+
+        <div class="timeline-container">
+            <input type="range" class="timeline" id="timeline" min="0" max="100" value="100">
+        </div>
+
+        <div class="jump-controls">
+            <button class="jump-btn" data-skip="-30">-30s</button>
+            <button class="jump-btn" data-skip="-600">-10m</button>
+            <button class="jump-btn" data-skip="-3600">-1h</button>
+            <button class="jump-btn" data-skip="30">+30s</button>
+            <button class="jump-btn" data-skip="600">+10m</button>
+            <button class="jump-btn" data-skip="3600">+1h</button>
+        </div>
+
+        <div class="main-controls">
+            <button class="control-btn" id="prev-btn" title="Previous track" aria-label="Previous track">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+            </button>
+            <button class="control-btn play-btn" id="play-btn" title="Play/Pause" aria-label="Play">
+                <svg class="icon" id="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg class="icon" id="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+            <button class="control-btn" id="next-btn" title="Next track" aria-label="Next track">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+            </button>
+            <button class="control-btn live-btn" id="live-btn" title="Go to live" aria-label="Go to live">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="version-info" style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+            v1.6.0
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // Configuration
+        // ============================================
+        const TAG = '[NATM]';
+        const LIVE_EDGE_OFFSET = 30;  // seconds behind live edge
+        const PLAYLIST_URL = 'playlist.json';
+        const POLL_INTERVAL = 5000;  // 5 seconds
+
+        // ============================================
+        // State
+        // ============================================
+        let segments = [];
+        let currentIndex = 0;
+        let currentTime = 0;
+        let isDragging = false;
+        let playbackIntent = false;  // Track user's play intent (independent of actual player state)
+        let liveReloadCount = 0;    // Track consecutive live edge reload attempts
+        const MAX_LIVE_RELOADS = 3; // Maximum consecutive reloads before fallback
+        let liveBufferRetryCount = 0; // M8: Counter for recursive handleEnded buffer retries
+
+        // M9: Derive playing state from the active player instead of tracking separately
+        const isPlaying = () => {
+            const active = getActive();
+            return !active.paused && !active.ended && !!active.src;
+        };
+
+        // Dual-buffer players
+        const playerA = new Audio();
+        const playerB = new Audio();
+        let usePlayerA = true;
+
+        // Track pending timeouts per player (fix for infinite reload loop bug)
+        let playerATimeout = null;
+        let playerBTimeout = null;
+
+        // L6: Use Map for recovery counters instead of attaching to Audio objects
+        const recoveryCounts = new Map();
+        recoveryCounts.set(playerA, 0);
+        recoveryCounts.set(playerB, 0);
+        const MAX_RECOVERY_ATTEMPTS = 3;  // Max consecutive recovery attempts per player
+
+        const getActive = () => usePlayerA ? playerA : playerB;
+        const getNext = () => usePlayerA ? playerB : playerA;
+
+        // M7: Shared recovery function — eliminates duplicated logic
+        function attemptRecovery(player, playerName, index, offset) {
+            const count = recoveryCounts.get(player) || 0;
+            if (count >= MAX_RECOVERY_ATTEMPTS) {
+                log.e(playerName, 'Max recovery attempts reached, giving up', {
+                    attempts: count,
+                    max: MAX_RECOVERY_ATTEMPTS
+                });
+                recoveryCounts.set(player, 0);
+                setStatus('Playback error — unable to recover', 'error');
+                return false;
+            }
+            recoveryCounts.set(player, count + 1);
+            setStatus('Recovering playback...', 'recovering');
+            log.i(playerName, 'Recovery attempt', { attempt: count + 1, max: MAX_RECOVERY_ATTEMPTS });
+            setTimeout(() => playSegment(index, Math.max(0, offset), true), 2000);
+            return true;
+        }
+
+        const switchPlayer = () => {
+            usePlayerA = !usePlayerA;
+
+            // Clear pending timeouts for BOTH players to prevent orphaned callbacks
+            if (playerATimeout) {
+                clearTimeout(playerATimeout);
+                playerATimeout = null;
+            }
+            if (playerBTimeout) {
+                clearTimeout(playerBTimeout);
+                playerBTimeout = null;
+            }
+
+            // Clear event handlers on BOTH players to prevent stale callbacks
+            // This fixes the infinite reload loop bug where preloadNext() would trigger
+            // the inactive player's old onloadedmetadata handler, which would call
+            // playSegment() with old closure variables (stale segment index/offset)
+            playerA.onloadedmetadata = null;
+            playerA.onerror = null;
+            playerB.onloadedmetadata = null;
+            playerB.onerror = null;
+
+            return getActive();
+        };
+
+        // DOM elements
+        const UI = {
+            overlay: document.getElementById('overlay'),
+            trackTitle: document.getElementById('track-title'),
+            timeDisplay: document.getElementById('time-display'),
+            dateDisplay: document.getElementById('date-display'),
+            timeline: document.getElementById('timeline'),
+            playBtn: document.getElementById('play-btn'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            liveBtn: document.getElementById('live-btn'),
+            playIcon: document.getElementById('play-icon'),
+            pauseIcon: document.getElementById('pause-icon'),
+            hamburgerBtn: document.getElementById('hamburger-btn'),
+            segmentDropdown: document.getElementById('segment-dropdown'),
+            segmentList: document.getElementById('segment-list'),
+            statusIndicator: document.getElementById('status-indicator')
+        };
+
+        // ============================================
+        // Logging
+        // ============================================
+        const log = {
+            d: (...args) => console.debug(TAG, ...args),
+            i: (...args) => console.info(TAG, ...args),
+            w: (...args) => console.warn(TAG, ...args),
+            e: (...args) => console.error(TAG, ...args),
+            // Enhanced logging with context
+            state: (event, detail) => console.info(TAG, `STATE: ${event}`, detail),
+            buffer: (player, buffered, duration) => console.info(TAG, `BUFFER: ${Math.round((buffered/duration)*100)}% buffered=${buffered.toFixed(1)}s dur=${duration.toFixed(1)}s`),
+            network: (type, url, status) => console.info(TAG, `NETWORK: ${type} ${url} status=${status}`)
+        };
+
+        // Health check tracking
+        let lastHealthCheck = Date.now();
+        let playbackErrors = [];
+        let networkErrors = [];
+
+        function recordError(type, message, detail) {
+            const error = { timestamp: Date.now(), type, message, detail };
+            if (type === 'playback') playbackErrors.push(error);
+            if (type === 'network') networkErrors.push(error);
+            log.e(`[${type.toUpperCase()}]`, message, detail);
+            // Keep only last 10 errors
+            if (playbackErrors.length > 10) playbackErrors.shift();
+            if (networkErrors.length > 10) networkErrors.shift();
+        }
+
+        // Status indicator for user-visible feedback (H1)
+        function setStatus(message, type) {
+            UI.statusIndicator.textContent = message || '';
+            UI.statusIndicator.className = 'status-indicator';
+            if (type) UI.statusIndicator.classList.add(type);
+            if (message) log.i('Status:', message, type || 'info');
+        }
+
+        // Track playlist generation to avoid redundant DOM rebuilds (H2)
+        let lastGeneratedAt = 0;
+        let consecutivePlaylistFailures = 0;
+
+        // M1: Adaptive polling — slow down when playlist is static
+        let consecutiveUnchanged = 0;
+        const ADAPTIVE_INTERVALS = [5000, 10000, 30000, 60000]; // 5s, 10s, 30s, 60s
+        let pollTimer = null;
+
+        // ============================================
+        // Utilities
+        // ============================================
+        // 12-hour time format (Feature #2)
+        function fmtTime12Hour(unix) {
+            if (!unix) return '--:--:--';
+            const date = new Date(unix * 1000);
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            // Convert to 12-hour format (0 -> 12, 13 -> 1)
+            hours = hours % 12;
+            if (hours === 0) hours = 12;
+
+            return `${hours}:${minutes}:${seconds} ${ampm}`;
+        }
+
+        // Date with day name (Feature #2)
+        function fmtDate(unix) {
+            if (!unix) return '';
+            const date = new Date(unix * 1000);
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dayName = dayNames[date.getDay()];
+            const month = monthNames[date.getMonth()];
+            const day = date.getDate();
+            return `${dayName} ${month} ${day}`;
+        }
+
+        // Date with "Today" for current-day segments (hamburger menu, v1.5.4; v1.6.0)
+        function fmtSegmentDate(unix) {
+            if (!unix) return '';
+            const segDate = new Date(unix * 1000);
+            const now = new Date();
+            const isToday = segDate.getFullYear() === now.getFullYear() &&
+                            segDate.getMonth() === now.getMonth() &&
+                            segDate.getDate() === now.getDate();
+            return isToday ? 'Today' : fmtDate(unix);
+        }
+
+        function segIndexForTime(t) {
+            if (!segments.length) return 0;
+            // Iterate backwards to prefer later segment when timestamps overlap
+            for (let i = segments.length - 1; i >= 0; i--) {
+                if (t >= segments[i].start && t <= segments[i].end) return i;
+            }
+            return segments.length - 1;
+        }
+
+        function toggleSegmentList() {
+            UI.segmentDropdown.classList.toggle('show');
+            const isVisible = UI.segmentDropdown.classList.contains('show');
+            UI.hamburgerBtn.setAttribute('aria-expanded', isVisible);
+        }
+
+        function renderSegmentList() {
+            // Clear existing list (safe: no innerHTML with external data)
+            UI.segmentList.replaceChildren();
+
+            if (!segments.length) {
+                const empty = document.createElement('div');
+                empty.className = 'segment-item';
+                empty.textContent = 'No segments available';
+                UI.segmentList.appendChild(empty);
+                return;
+            }
+
+            // Create items in reverse order (newest first)
+            const reversed = segments.slice().reverse();
+            reversed.forEach((seg, idx) => {
+                const originalIndex = segments.length - 1 - idx;
+
+                const item = document.createElement('div');
+                item.className = 'segment-item';
+                item.dataset.index = originalIndex;
+                item.tabIndex = 0;       // M2: Make focusable for keyboard navigation
+                item.setAttribute('role', 'option');  // M2: ARIA role for listbox option
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'segment-item-title';
+                titleSpan.textContent = seg.title || 'No Agenda Stream';
+
+                const metaDiv = document.createElement('span');
+                metaDiv.className = 'segment-item-meta';
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'segment-item-time';
+                timeSpan.textContent = fmtTime12Hour(seg.start);
+
+                const dot = document.createElement('span');
+                dot.textContent = ' · ';
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'segment-item-date';
+                dateSpan.textContent = fmtSegmentDate(seg.start);
+
+                metaDiv.appendChild(timeSpan);
+                metaDiv.appendChild(dot);
+                metaDiv.appendChild(dateSpan);
+
+                item.appendChild(titleSpan);
+                item.appendChild(metaDiv);
+                UI.segmentList.appendChild(item);
+            });
+        }
+
+        function setupSegmentListHandlers() {
+            // Segment item click handler (also handles keyboard Enter/Space)
+            UI.segmentList.addEventListener('click', (e) => {
+                const item = e.target.closest('.segment-item');
+                if (!item) return;
+
+                const index = parseInt(item.dataset.index);
+                if (segments[index]) {
+                    console.log('[USER] Segment list: selected segment', index);
+                    seekToTime(segments[index].start);
+                    toggleSegmentList(); // Close menu
+                }
+            });
+
+            // M2: Keyboard support for segment items (Enter/Space to select)
+            UI.segmentList.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const item = e.target.closest('.segment-item');
+                    if (!item) return;
+                    const index = parseInt(item.dataset.index);
+                    if (segments[index]) {
+                        console.log('[USER] Segment list: keyboard selected segment', index);
+                        seekToTime(segments[index].start);
+                        toggleSegmentList();
+                    }
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!UI.segmentDropdown.contains(e.target) && !UI.hamburgerBtn.contains(e.target)) {
+                    UI.segmentDropdown.classList.remove('show');
+                    UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // M2: Escape key closes dropdown and returns focus to hamburger button
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && UI.segmentDropdown.classList.contains('show')) {
+                    UI.segmentDropdown.classList.remove('show');
+                    UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
+                    UI.hamburgerBtn.focus();
+                }
+            });
+
+            // Hamburger button click handler
+            UI.hamburgerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('[USER] Hamburger button clicked');
+                toggleSegmentList();
+            });
+        }
+
+        // ============================================
+        // Playlist fetching
+        // ============================================
+        async function fetchPlaylist() {
+            const url = PLAYLIST_URL + '?t=' + Date.now();
+            try {
+                log.network('FETCH_START', url, 'pending');
+                const resp = await fetch(url);
+                if (!resp.ok) {
+                    const err = `Playlist fetch failed: ${resp.status} ${resp.statusText}`;
+                    log.w(err);
+                    recordError('network', 'playlist_fetch', { status: resp.status, url });
+                    log.network('FETCH_ERROR', url, resp.status);
+                    consecutivePlaylistFailures++;
+                    if (consecutivePlaylistFailures >= 3) {
+                        setStatus('Unable to reach server — retrying', 'error');
+                    }
+                    return;
+                }
+                const data = await resp.json();
+                consecutivePlaylistFailures = 0;
+                setStatus('');  // Clear any error status
+                const prevCount = segments.length;
+                segments = data.segments || [];
+                log.i('Playlist updated:', prevCount, '->', segments.length, 'segments');
+                log.network('FETCH_SUCCESS', url, resp.status);
+                updateTimeline();
+                // Only re-render if playlist actually changed (H2)
+                if (data.generated_at !== lastGeneratedAt) {
+                    lastGeneratedAt = data.generated_at;
+                    renderSegmentList();
+                    consecutiveUnchanged = 0;  // M1: Reset adaptive counter
+                } else {
+                    consecutiveUnchanged++;  // M1: Increase adaptive delay
+                }
+            } catch (e) {
+                const err = `Playlist error: ${e.message}`;
+                log.w(err);
+                recordError('network', 'playlist_parse', { error: e.message, url });
+                log.network('FETCH_ERROR', url, 'exception');
+                consecutivePlaylistFailures++;
+                if (consecutivePlaylistFailures >= 3) {
+                    setStatus('Network error — retrying', 'error');
+                }
+            }
+        }
+
+        // ============================================
+        // Playback
+        // ============================================
+        function playSegment(index, offset, shouldPlay = false) {
+            if (index < 0 || index >= segments.length) {
+                log.e('Invalid segment index:', index, 'total:', segments.length);
+                recordError('playback', 'invalid_segment', { index, total: segments.length });
+                return;
+            }
+
+            currentIndex = index;
+            const seg = segments[index];
+
+            if (!seg) {
+                log.e('Segment at index', index, 'is null/undefined');
+                recordError('playback', 'null_segment', { index });
+                return;
+            }
+
+            const active = getActive();
+            const playerName = usePlayerA ? 'A' : 'B';
+
+            let url = seg.url;
+            const isLive = (index === segments.length - 1) && !seg.final;
+            if (isLive) url += '?t=' + Date.now();
+
+            // Validate offset is within reasonable bounds
+            const segDuration = seg.end - seg.start;
+            if (offset < 0 || offset > segDuration + 60) {  // Allow 60s buffer for live segments
+                log.w('Offset out of bounds:', offset, 'segment duration:', segDuration);
+                // Clamp offset to valid range
+                offset = Math.max(0, Math.min(offset, segDuration));
+            }
+
+            log.state('PLAY_SEGMENT', { index, offset, url, isLive, title: seg.title, playerName });
+            log.i('Play segment:', index, url, 'offset:', offset.toFixed(1), 'title:', seg.title);
+
+            // Clear any existing event handlers to avoid duplicates
+            active.onloadedmetadata = null;
+            active.onerror = null;
+
+            // Check if player already has this source loaded (avoid redundant load)
+            // Compare absolute URLs since active.src returns the resolved absolute URL
+            const activeAbsUrl = active.src ? new URL(active.src, window.location.href).href : null;
+            const requestedAbsUrl = new URL(url, window.location.href).href;
+            if (activeAbsUrl === requestedAbsUrl) {
+                log.d(playerName, 'Source already loaded, skipping redundant load');
+                // Clear any pending timeout for this player since we're not loading
+                const timeoutRef = active === playerA ? playerATimeout : playerBTimeout;
+                if (timeoutRef) {
+                    clearTimeout(timeoutRef);
+                    if (active === playerA) playerATimeout = null;
+                    else playerBTimeout = null;
+                }
+                return;  // Exit early, don't call load()
+            }
+            active.src = url;
+            log.state('LOAD_START', { player: playerName, url });
+
+            // Set up error handler for this load operation
+            active.onerror = (e) => {
+                const errorDetail = {
+                    player: playerName,
+                    error: e.message || 'Unknown load error',
+                    code: active.error?.code,
+                    message: active.error?.message,
+                    url
+                };
+                log.e(playerName, 'LOAD_ERROR:', errorDetail);
+                recordError('playback', 'segment_load_error', errorDetail);
+
+                // Attempt recovery: reload the segment after a delay
+                if (shouldPlay) {
+                    attemptRecovery(active, playerName, index, offset);
+                }
+            };
+
+            active.onloadedmetadata = () => {
+                // Clear metadata timeout since we got the metadata successfully
+                clearTimeout(metadataTimeout);
+                if (active === playerA) {
+                    playerATimeout = null;
+                } else {
+                    playerBTimeout = null;
+                }
+
+                // Reset recovery counter on successful load
+                recoveryCounts.set(active, 0);
+
+                if (!active.duration || active.duration === 0 || !isFinite(active.duration)) {
+                    log.e(playerName, 'Invalid duration after load:', active.duration);
+                    recordError('playback', 'invalid_duration', { player: playerName, duration: active.duration });
+                    return;
+                }
+
+                const target = Math.min(offset, active.duration - 0.5);
+                if (target < 0) {
+                    log.w(playerName, 'Target position negative, using 0');
+                    active.currentTime = 0;
+                } else {
+                    active.currentTime = target;
+                }
+
+                log.state('METADATA_LOADED', { player: playerName, duration: active.duration.toFixed(2), target: target.toFixed(2) });
+
+                if (shouldPlay) {
+                    const playPromise = active.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => {
+                            // AbortError is expected when rapid navigation interrupts previous play request
+                            // Not a real error - just user navigating quickly
+                            if (e.name === 'AbortError') {
+                                log.d(playerName, 'Play aborted by new load request (expected during rapid navigation)');
+                                return;  // Don't record as error or attempt recovery
+                            }
+                            log.w(playerName, 'Play rejected:', e.message);
+                            recordError('playback', 'play_rejected', { index, error: e.message, name: e.name });
+
+                            // Attempt recovery for non-abort errors only
+                            setTimeout(() => {
+                                if (!active.paused) return;  // Already playing
+                                log.i(playerName, 'Recovery - retrying play');
+                                active.play().catch(retryErr => {
+                                    if (retryErr.name !== 'AbortError') {
+                                        log.e(playerName, 'Recovery play failed:', retryErr.message);
+                                    }
+                                });
+                            }, 1000);
+                        });
+                    }
+                }
+                preloadNext();
+                updateUI();
+            };
+
+            // Set a timeout for metadata loading
+            const metadataTimeout = setTimeout(() => {
+                if (!active.duration) {
+                    log.w(playerName, 'Metadata load timeout - forcing retry');
+                    recordError('playback', 'metadata_timeout', { player: playerName, url });
+                    if (shouldPlay) {
+                        setTimeout(() => playSegment(index, offset, shouldPlay), 1000);
+                    }
+                }
+            }, 10000);  // 10 second timeout
+
+            // Store timeout reference for later clearing when switching players
+            if (active === playerA) {
+                playerATimeout = metadataTimeout;
+            } else {
+                playerBTimeout = metadataTimeout;
+            }
+
+            active.preload = 'auto';  // H3: Switch to full download when player becomes active
+            active.load();
+        }
+
+        function preloadNext() {
+            if (currentIndex >= segments.length - 1) return;
+            const next = getNext();
+            const nextUrl = segments[currentIndex + 1].url;
+            // Only set src if not already set (avoid redundant loads)
+            if (!next.src || next.src !== nextUrl) {
+                next.src = nextUrl;
+            }
+            // Note: No need to call load() - preload='auto' handles it
+        }
+
+        function seekToTime(t) {
+            if (!segments.length) {
+                log.w('seekToTime: no segments available');
+                return;
+            }
+
+            // Clamp to valid range
+            t = Math.max(segments[0].start, Math.min(t, segments[segments.length - 1].end));
+            currentTime = t;
+
+            const idx = segIndexForTime(t);
+
+            // Validate segment exists
+            if (!segments[idx]) {
+                log.e('seekToTime: segment at index', idx, 'does not exist');
+                recordError('playback', 'seek_segment_missing', { index: idx, total: segments.length });
+                return;
+            }
+
+            let offset = t - segments[idx].start;
+            const seg = segments[idx];
+
+            // Validate offset is within segment bounds
+            const segDuration = seg.end - seg.start;
+            if (offset < 0 || offset > segDuration) {
+                log.w('seekToTime: offset out of bounds, clamping', { offset, segDuration });
+                offset = Math.max(0, Math.min(offset, segDuration));
+            }
+
+            // L5: Avoid unnecessary player switch when staying on same segment
+            // Only switch players when changing to a different segment
+            if (idx !== currentIndex) {
+                const currentActive = getActive();
+                currentActive.pause();
+
+                // Switch player before loading new segment (dual-buffer architecture)
+                const newPlayer = switchPlayer();
+
+                log.i('seekToTime: switching players', {
+                    from: currentActive === playerA ? 'A' : 'B',
+                    to: newPlayer === playerA ? 'A' : 'B',
+                    index: idx,
+                    offset: offset.toFixed(2)
+                });
+            } else {
+                // Same segment — just seek within current player
+                log.i('seekToTime: same segment, seeking within current player', {
+                    index: idx,
+                    offset: offset.toFixed(2)
+                });
+            }
+
+            // Use playbackIntent to determine if we should play after seeking
+            playSegment(idx, offset, playbackIntent);
+        }
+
+        function skip(seconds) {
+            seekToTime(currentTime + seconds);
+        }
+
+        function prevTrack() {
+            // Get current time from actual player, not stale global
+            const active = getActive();
+            const actualCurrentTime = segments[currentIndex]?.start + active.currentTime || currentTime;
+
+            // Validate current segment exists
+            if (!segments[currentIndex]) {
+                log.e('prevTrack: current segment does not exist', { currentIndex, total: segments.length });
+                recordError('playback', 'prev_track_no_current_segment', { currentIndex, total: segments.length });
+                return;
+            }
+
+            // If more than 10s into current segment, seek to start of current segment
+            if (actualCurrentTime - segments[currentIndex].start > 10) {
+                seekToTime(segments[currentIndex].start);
+            } else if (currentIndex > 0) {
+                // Validate previous segment exists
+                if (!segments[currentIndex - 1]) {
+                    log.e('prevTrack: previous segment does not exist', { currentIndex, total: segments.length });
+                    recordError('playback', 'prev_track_no_previous_segment', { currentIndex, total: segments.length });
+                    return;
+                }
+                seekToTime(segments[currentIndex - 1].start);
+            } else {
+                log.i('prevTrack: at start of playlist, nowhere to go');
+            }
+        }
+
+        function nextTrack() {
+            // Validate current segment exists
+            if (!segments[currentIndex]) {
+                log.e('nextTrack: current segment does not exist', { currentIndex, total: segments.length });
+                recordError('playback', 'next_track_no_current_segment', { currentIndex, total: segments.length });
+                return;
+            }
+
+            // Check if there's a next segment
+            if (currentIndex >= segments.length - 1) {
+                log.i('nextTrack: at end of playlist, nowhere to go');
+                return;
+            }
+
+            // Validate next segment exists
+            if (!segments[currentIndex + 1]) {
+                log.e('nextTrack: next segment does not exist', { currentIndex, total: segments.length });
+                recordError('playback', 'next_track_no_next_segment', { currentIndex, total: segments.length });
+                return;
+            }
+
+            log.i('nextTrack: advancing to next segment', { from: currentIndex, to: currentIndex + 1 });
+            seekToTime(segments[currentIndex + 1].start);
+        }
+
+        function togglePlay() {
+            const active = getActive();
+            if (active.paused) {
+                log.state('TOGGLE_PLAY', { action: 'play', hasSrc: !!active.src, currentTime });
+                playbackIntent = true;  // User wants playback
+                if (!active.src) seekToTime(currentTime);
+                active.play().catch(e => {
+                    if (e.name === 'AbortError') {
+                        log.d('Play aborted in togglePlay (expected during rapid navigation)');
+                        return;
+                    }
+                    log.w('Play rejected:', e.message);
+                    recordError('playback', 'toggle_play', { error: e.message, name: e.name });
+                });
+            } else {
+                log.state('TOGGLE_PLAY', { action: 'pause', currentTime });
+                playbackIntent = false;  // User wants pause
+                active.pause();
+            }
+        }
+
+        function goLive() {
+            if (!segments.length) {
+                log.w('goLive: no segments available');
+                return;
+            }
+            const lastSeg = segments[segments.length - 1];
+            let target = lastSeg.end - LIVE_EDGE_OFFSET;
+            if (target < lastSeg.start) target = lastSeg.start;
+            log.state('GO_LIVE', { target: target.toFixed(2), segment: lastSeg.title });
+            playbackIntent = true;
+            seekToTime(target);
+        }
+
+        // ============================================
+        // Live edge handling
+        // ============================================
+        function handleEnded() {
+            const active = getActive();
+            const isLast = (currentIndex === segments.length - 1);
+            const isLive = isLast && segments[currentIndex]?.final === false;
+
+            log.state('HANDLE_ENDED', { currentIndex, isLast, isLive, segments: segments.length });
+
+            if (isLast && isLive) {
+                // Live edge - reload with offset
+                log.i('Live edge reload - attempting to maintain playback');
+
+                const seg = segments[currentIndex];
+                if (!seg) {
+                    log.e('Live edge reload - no segment available');
+                    recordError('playback', 'live_reload_no_segment', { currentIndex });
+                    liveReloadCount++;
+                    updateUI();
+                    return;
+                }
+
+                // Check if we've exceeded max reload attempts - fall back to segment start
+                if (liveReloadCount >= MAX_LIVE_RELOADS) {
+                    log.w('Live edge reload - exceeded max attempts, falling back to segment start');
+                    log.state('LIVE_RELOAD_FALLBACK', { attempts: liveReloadCount, max: MAX_LIVE_RELOADS });
+                    liveReloadCount = 0;  // Reset counter
+                    playSegment(currentIndex, 0, playbackIntent);
+                    return;
+                }
+
+                // Get actual audio duration from the player, not server-side seg.end
+                const actualDuration = active.duration;
+                const currentPos = active.currentTime;
+                let offset;
+
+                if (actualDuration && actualDuration > 0 && isFinite(actualDuration)) {
+                    // Check if we're actually close to the live edge before reloading
+                    // This prevents unnecessary reloads that could cause skips
+                    if (currentPos < actualDuration - LIVE_EDGE_OFFSET - 5) {
+                        log.i('Live edge reload - not close enough to edge, continuing playback', {
+                            currentPos: currentPos.toFixed(2),
+                            actualDuration: actualDuration.toFixed(2),
+                            liveEdgeOffset: LIVE_EDGE_OFFSET
+                        });
+                        // Continue playing from current position instead of reloading
+                        playSegment(currentIndex, currentPos, playbackIntent);
+                        return;
+                    }
+
+                    // Use buffered range as basis for offset (more reliable than duration)
+                    if (active.buffered.length > 0) {
+                        const bufferedEnd = active.buffered.end(active.buffered.length - 1);
+                        // Use bufferedEnd as the effective "end" of the stream
+                        const effectiveDuration = Math.min(actualDuration, bufferedEnd);
+
+                        if (effectiveDuration < LIVE_EDGE_OFFSET) {
+                            log.w('Live edge reload - effective duration too short, using available duration', {
+                                effectiveDuration: effectiveDuration.toFixed(2),
+                                liveEdgeOffset: LIVE_EDGE_OFFSET
+                            });
+                            liveReloadCount++;
+                            // M8: Limit recursive buffer retries to prevent infinite loops
+                            if (liveBufferRetryCount >= MAX_LIVE_RELOADS) {
+                                log.w('Live edge buffer retry - exceeded max attempts, falling back');
+                                liveBufferRetryCount = 0;
+                                liveReloadCount = 0;
+                                playSegment(currentIndex, 0, playbackIntent);
+                                updateUI();
+                                return;
+                            }
+                            liveBufferRetryCount++;
+                            // Retry after a short delay to allow more data to buffer
+                            setTimeout(() => {
+                                if (segments[currentIndex]) {
+                                    log.i('Live edge reload - retrying after buffer delay');
+                                    handleEnded();  // Retry
+                                }
+                            }, 2000);
+                            updateUI();
+                            return;
+                        }
+                        offset = effectiveDuration - LIVE_EDGE_OFFSET;
+
+                        // Final validation: ensure offset is within range
+                        if (offset < 0) {
+                            log.w('Live edge reload - negative offset, using start', {
+                                offset: offset.toFixed(2),
+                                effectiveDuration: effectiveDuration.toFixed(2)
+                            });
+                            offset = 0;
+                        }
+                    } else {
+                        // Fallback if no buffered range info
+                        offset = actualDuration - LIVE_EDGE_OFFSET;
+                    }
+                } else {
+                    // Fallback to server-side duration if actual duration not available
+                    const segDuration = seg.end - seg.start;
+                    if (segDuration < LIVE_EDGE_OFFSET) {
+                        log.w('Live edge reload - segment too short, waiting');
+                        log.state('LIVE_RELOAD_WAIT', { segDuration, liveEdgeOffset: LIVE_EDGE_OFFSET });
+                        liveReloadCount++;
+                        setTimeout(() => {
+                            const freshSeg = segments[currentIndex];
+                            if (freshSeg && (freshSeg.end - freshSeg.start) >= LIVE_EDGE_OFFSET) {
+                                const offset = (freshSeg.end - freshSeg.start) - LIVE_EDGE_OFFSET;
+                                playSegment(currentIndex, offset, true);
+                            } else {
+                                // Retry with whatever we have
+                                const offset = Math.max(0, (freshSeg?.end - freshSeg.start || 0) - 5);
+                                playSegment(currentIndex, offset, true);
+                            }
+                        }, 5000);
+                        updateUI();
+                        return;
+                    }
+                    offset = segDuration - LIVE_EDGE_OFFSET;
+                }
+
+                // Reset reload counters on successful reload
+                liveReloadCount = 0;
+                liveBufferRetryCount = 0;
+
+                log.state('LIVE_RELOAD', {
+                    segStart: seg.start,
+                    segEnd: seg.end,
+                    actualDuration: actualDuration?.toFixed(2) || 'unknown',
+                    offset: offset.toFixed(2),
+                    liveEdgeOffset: LIVE_EDGE_OFFSET
+                });
+
+                playSegment(currentIndex, offset, playbackIntent);
+
+            } else if (currentIndex < segments.length - 1) {
+                // Next segment - use playSegment for clean state management
+                const nextIndex = currentIndex + 1;
+                const nextSeg = segments[nextIndex];
+
+                if (!nextSeg) {
+                    log.e('Next segment - no segment available');
+                    recordError('playback', 'next_segment_missing', { index: nextIndex });
+                    updateUI();
+                    return;
+                }
+
+                log.state('NEXT_SEGMENT', { from: currentIndex, to: nextIndex });
+                usePlayerA = !usePlayerA;
+                playSegment(nextIndex, 0, playbackIntent);
+            } else {
+                // End of playlist
+                log.state('END_OF_PLAYLIST', { currentIndex, total: segments.length });
+                recordError('playback', 'end_of_playlist', { currentIndex, total: segments.length });
+                playbackIntent = false;
+                setStatus('End of playlist', 'info');
+            }
+            updateUI();
+        }
+
+        // ============================================
+        // UI Updates
+        // ============================================
+        function updateUI() {
+            const active = getActive();
+            const isPaused = active.paused;
+
+            // Play/pause icon
+            if (isPaused) {
+                UI.playIcon.style.display = 'block';
+                UI.pauseIcon.style.display = 'none';
+            } else {
+                UI.playIcon.style.display = 'none';
+                UI.pauseIcon.style.display = 'block';
+            }
+
+            // M3: Update play/pause aria-label for screen readers
+            UI.playBtn.setAttribute('aria-label', isPaused ? 'Play' : 'Pause');
+
+            // Track title
+            if (segments[currentIndex]) {
+                UI.trackTitle.textContent = segments[currentIndex].title || 'No Agenda Stream';
+            }
+        }
+
+        function updateTimeline() {
+            if (!segments.length) return;
+            const newMax = segments.length - 1;
+            if (UI.timeline.max !== String(newMax)) {
+                UI.timeline.max = newMax;
+            }
+        }
+
+        // Heartbeat - update time display
+        setInterval(() => {
+            const active = getActive();
+            if (segments[currentIndex]) {
+                currentTime = segments[currentIndex].start + active.currentTime;
+                if (!isDragging) {
+                    UI.timeline.value = currentIndex;
+                    UI.timeline.setAttribute('aria-valuetext', fmtTime12Hour(currentTime));  // M3
+                    UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
+                    UI.dateDisplay.textContent = fmtDate(currentTime);
+                }
+            }
+            updateUI();
+        }, 1000);
+
+        // ============================================
+        // Event Listeners
+        // ============================================
+
+        // L7: Jump buttons via data attributes (moved from inline onclick)
+        document.querySelectorAll('.jump-btn[data-skip]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const seconds = parseInt(btn.dataset.skip);
+                console.log('[USER] Skip:', seconds > 0 ? `+${seconds}s` : `${seconds}s`);
+                skip(seconds);
+            });
+        });
+
+        // L7: Transport buttons (moved from inline onclick)
+        UI.prevBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Previous track');
+            prevTrack();
+        });
+        UI.playBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Play/Pause');
+            togglePlay();
+        });
+        UI.nextBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Next track');
+            nextTrack();
+        });
+        UI.liveBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Go Live');
+            goLive();
+        });
+
+        UI.timeline.addEventListener('input', (e) => {
+            console.log('[USER] Timeline drag started');
+            isDragging = true;
+            const segIndex = parseInt(e.target.value);
+            if (segments[segIndex]) {
+                const seg = segments[segIndex];
+                UI.timeDisplay.textContent = fmtTime12Hour(seg.start);
+                UI.dateDisplay.textContent = fmtDate(seg.start);
+                UI.trackTitle.textContent = seg.title || 'No Agenda Stream';
+                UI.timeline.setAttribute('aria-valuetext', fmtTime12Hour(seg.start));  // M3
+                currentTime = seg.start;
+            }
+        });
+
+        UI.timeline.addEventListener('change', (e) => {
+            const segIndex = parseInt(e.target.value);
+            console.log('[USER] Timeline seek to segment:', segIndex);
+            isDragging = false;
+            if (segments[segIndex]) {
+                seekToTime(segments[segIndex].start);
+            }
+        });
+
+        UI.overlay.addEventListener('click', () => {
+            console.log('[USER] Clicked: Start Player overlay');
+            log.state('OVERLAY_CLICK', 'User interaction captured');
+            UI.overlay.classList.add('hidden');
+            const active = getActive();
+            if (active.src) {
+                active.play().catch(e => {
+                    if (e.name === 'AbortError') {
+                        log.d('Play aborted in overlay click (expected during rapid navigation)');
+                        return;
+                    }
+                    log.w('Autoplay failed:', e.message);
+                    recordError('playback', 'autoplay_blocked', { error: e.message });
+                });
+            }
+        });
+
+        // Player events - comprehensive monitoring
+        [playerA, playerB].forEach((p, idx) => {
+            const playerName = `player${idx === 0 ? 'A' : 'B'}`;
+
+            p.addEventListener('loadstart', () => {
+                log.state(playerName, 'LOAD_START');
+            });
+
+            p.addEventListener('loadedmetadata', () => {
+                log.state(playerName, 'METADATA_LOADED', { duration: p.duration });
+            });
+
+            p.addEventListener('loadeddata', () => {
+                log.state(playerName, 'DATA_LOADED');
+            });
+
+            p.addEventListener('canplay', () => {
+                log.state(playerName, 'CAN_PLAY');
+            });
+
+            p.addEventListener('canplaythrough', () => {
+                log.state(playerName, 'CAN_PLAY_THROUGH');
+            });
+
+            p.addEventListener('play', () => {
+                log.state(playerName, 'PLAY', { currentTime: p.currentTime });
+                playbackIntent = true;  // Sync intent with actual state
+                updateUI();
+            });
+
+            p.addEventListener('pause', () => {
+                log.state(playerName, 'PAUSE', { currentTime: p.currentTime });
+                // Don't clear playbackIntent - it represents user's intent, not current state
+                updateUI();
+            });
+
+            p.addEventListener('playing', () => {
+                log.state(playerName, 'PLAYING', { currentTime: p.currentTime });
+                setStatus('');  // Clear any recovering/error status
+                updateUI();
+            });
+
+            p.addEventListener('waiting', () => {
+                log.state(playerName, 'WAITING', { currentTime: p.currentTime });
+                log.w(playerName, 'is waiting for data');
+                updateUI();
+            });
+
+            p.addEventListener('stalled', () => {
+                log.state(playerName, 'STALLED', { currentTime: p.currentTime });
+                log.w(playerName, 'playback stalled - possible buffer underrun');
+                recordError('playback', 'stalled', { player: playerName, currentTime: p.currentTime });
+                setStatus('Buffering...', 'recovering');
+                updateUI();
+            });
+
+            p.addEventListener('ended', handleEnded);
+
+            p.addEventListener('error', (e) => {
+                const errorDetail = {
+                    player: playerName,
+                    error: e.message || 'Unknown error',
+                    code: e.target?.error?.code,
+                    message: e.target?.error?.message
+                };
+                log.e(playerName, 'ERROR:', errorDetail);
+                recordError('playback', 'audio_error', errorDetail);
+
+                // Attempt recovery: reload current segment
+                if (!p.paused && segments[currentIndex]) {
+                    const seg = segments[currentIndex];
+                    const offset = currentTime - seg.start;
+                    attemptRecovery(p, playerName, currentIndex, Math.max(0, offset));
+                }
+            });
+
+            let lastProgressLog = 0;
+            p.addEventListener('progress', () => {
+                // M10: Throttle buffer progress log to at most once per second
+                const now = Date.now();
+                if (now - lastProgressLog < 1000) return;
+                lastProgressLog = now;
+                if (p.buffered.length > 0) {
+                    const bufEnd = p.buffered.end(p.buffered.length - 1);
+                    log.buffer(playerName, bufEnd, p.duration);
+                }
+            });
+
+            p.addEventListener('timeupdate', () => {
+                // Log every 10 seconds for long-running monitoring
+                if (Math.floor(p.currentTime) % 10 === 0 && Math.floor(p.currentTime) > 0) {
+                    log.d(playerName, 'timeupdate', { currentTime: p.currentTime.toFixed(1), duration: p.duration?.toFixed(1) });
+                }
+            });
+
+            p.preload = 'metadata';  // H3: metadata-only for inactive player, switched to auto when active
+        });
+
+        // ============================================
+        // Initialization
+        // ============================================
+        async function init() {
+            log.state('INIT_START', 'Initializing No Agenda Time Machine player');
+            await fetchPlaylist();
+
+            if (!segments.length) {
+                log.e('No segments available');
+                return;
+            }
+
+            // Start at live edge minus offset
+            const lastSeg = segments[segments.length - 1];
+            let target = lastSeg.end - LIVE_EDGE_OFFSET;
+            if (target < lastSeg.start) target = lastSeg.start;
+
+            currentIndex = segments.length - 1;
+            currentTime = target;
+            UI.timeline.value = currentIndex;
+
+            log.state('INIT_CONFIG', {
+                totalSegments: segments.length,
+                currentIndex,
+                targetTime: target,
+                liveEdgeOffset: LIVE_EDGE_OFFSET,
+                pollInterval: POLL_INTERVAL
+            });
+
+            playSegment(currentIndex, target - lastSeg.start, false);
+            updateTimeline();
+            UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
+            UI.dateDisplay.textContent = fmtDate(currentTime);
+
+            // M1: Adaptive playlist polling — slows down when playlist is static
+            function scheduleNextPoll() {
+                const idx = Math.min(consecutiveUnchanged, ADAPTIVE_INTERVALS.length - 1);
+                const interval = ADAPTIVE_INTERVALS[idx];
+                pollTimer = setTimeout(async () => {
+                    await fetchPlaylist();
+                    scheduleNextPoll();
+                }, interval);
+            }
+            scheduleNextPoll();
+
+            // Setup segment list handlers
+            setupSegmentListHandlers();
+
+            // Health check - verify playback is still working
+            setInterval(() => {
+                const active = getActive();
+                const now = Date.now();
+                const timeSinceHealthCheck = (now - lastHealthCheck) / 1000;
+
+                // Check if player appears stuck (paused but user wants playback)
+                if (playbackIntent && active.paused && active.src) {
+                    log.w('Health check: playbackIntent=true but paused=true - possible issue');
+                    recordError('playback', 'health_check_stuck', {
+                        playbackIntent,
+                        paused: active.paused,
+                        hasSrc: !!active.src,
+                        currentIndex
+                    });
+
+                    // Attempt recovery
+                    if (segments[currentIndex]) {
+                        const seg = segments[currentIndex];
+                        const offset = currentTime - seg.start;
+                        log.i('Health check: attempting recovery');
+                        setTimeout(() => {
+                            playSegment(currentIndex, Math.max(0, offset), true);
+                        }, 500);
+                    }
+                }
+
+                // Check if buffer is depleted
+                if (active.buffered.length > 0 && active.duration > 0) {
+                    const bufEnd = active.buffered.end(active.buffered.length - 1);
+                    const bufferRemaining = bufEnd - active.currentTime;
+
+                    if (bufferRemaining < 2 && !active.paused) {
+                        log.w('Health check: buffer depleted', {
+                            bufferRemaining: bufferRemaining.toFixed(1),
+                            currentTime: active.currentTime.toFixed(1)
+                        });
+                        recordError('playback', 'buffer_depleted', {
+                            bufferRemaining,
+                            currentTime: active.currentTime
+                        });
+                    }
+                }
+
+                lastHealthCheck = now;
+            }, 30000); // Check every 30 seconds
+
+            log.i('INIT_COMPLETE', { segments: segments.length, ready: true });
+        }
+
+        window.addEventListener('load', () => init().catch(e => console.error(e)));
+    </script>
+
+    <!-- Interaction Testing Framework (for validation/testing) -->
+    <script id="interaction-test-script">
+    // Interaction tester will be loaded dynamically when needed
+    // Use: loadInteractionTest() then runQuickTest() or runContinuousTest()
+    window.loadInteractionTest = function() {
+        const script = document.createElement('script');
+        script.src = 'interaction_test.js';
+        script.onload = () => {
+            console.log('[NATM] Interaction test framework loaded');
+        };
+        document.head.appendChild(script);
+    };
+    </script>
+</body>
+</html>

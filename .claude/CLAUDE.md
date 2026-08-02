@@ -12,8 +12,8 @@ NoAgendaTimeMachine is a Python-based DVR for the No Agenda stream. It continuou
 - **Screen launcher** (`start.sh`): Manages recorder in detached screen session
 - **Live edge handling**: Dynamic reloading at the stream's leading edge with fixed 30s offset
 
-**Current Version:** v1.4.0 (Feature 13 + Simplification) - Released 2026-07-12
-**Project Status:** ✅ All bugs fixed, Feature 13 complete, File copies simplified - v1.4.0 released
+**Current Version:** v1.5.4 (Date display in hamburger menu) - Released 2026-08-01
+**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.5.4 released
 
 ## Project Structure
 
@@ -25,9 +25,9 @@ noAgendaTimeMachine/
 │   ├── v1.1.0/                   # Light theme release
 │   ├── v1.2.0/                   # UI improvements
 │   ├── v1.3.0/                   # 12 features complete
-│   ├── v1.4.0/                   # Current - Feature 13 + simplification
+│   ├── v1.5.4/                   # Current - Date display in hamburger menu
 │   │   ├── index.html
-│   │   ├── RELEASE_v1.4.0.md
+│   │   ├── RELEASE_v1.5.4.md
 │   │   └── audio/
 │   │       ├── recorderd.py
 │   │       ├── start.sh
@@ -237,7 +237,7 @@ audio/segments/*.mp3 → plays audio
 | **11** | Match NoAgenda.stream CSS | Light theme matching NoAgenda.stream color palette (bluish-gray background, white cards, dark text) | ✅ Complete | 2026-07-11 |
 | **12** | Remaining validation | Complete Bug 3 validation test, all bugs validated | ✅ Complete | 2026-07-11 |
 | **13** | Slider drag updates title | As slider is dragged, title updates to segment at dragged position | ✅ Complete | 2026-07-12 |
-| **14** | Hamburger segment list | Add hamburger button with scrollable segment list | ⏳ Pending | - |
+| **14** | Hamburger segment list | Add hamburger button with scrollable segment list showing time + date (v1.5.4) | ✅ Complete | 2026-07-29 |
 
 **Simplification (v1.4.0):**
 
@@ -340,7 +340,7 @@ audio/segments/*.mp3 → plays audio
 - `test_validation/index.html` is now symlink → `../validation/production/index.html` (or copy if symlink unavailable)
 - Release artifacts (`release/v1.*/`) remain frozen and untouched
 
-**Regression Tests:** 45 Playwright tests, all passing (5+7+6+6+6+8+7)
+**Regression Tests:** 72 Playwright tests, all passing (v1.5.4)
 
 ### Known Issues & Considerations
 
@@ -573,8 +573,8 @@ npx playwright test --reporter=list
 
 ### Quick Reference
 
-- **Current Release**: `release/v1.4.0/` - Feature 13 + simplification, 45 tests passing
-- **Current Version**: v1.4.0 (2026-07-12)
+- **Current Release**: `release/v1.5.4/` - Date display in hamburger menu, 72 tests passing
+- **Current Version**: v1.5.4 (2026-08-01)
 - **Bug Validation**: All 3 bugs fixed and validated
 - **Features Implemented** (13/14):
   - Remove green bar (1), 12-hour clock (2), Fixed title height (3), Prevent zoom (4)
@@ -582,4 +582,4 @@ npx playwright test --reporter=list
   - Equal sizes (9), Larger slider (10), Light theme (11), Bug3 validation (12)
   - Slider drag title (13), Hamburger list (14 - pending)
 - **Simplification**: 3 live copies → 1 canonical (validation/production/) + symlink (test_validation/)
-- **Regression Tests**: 45 tests - feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8), feature13 (7)
+- **Regression Tests**: 72 tests - feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8), feature13 (7), feature14a (10), abort-error (3), feature14 (15)

@@ -2,9 +2,9 @@
 
 A Python-based DVR for the No Agenda stream with time-shifted web playback.
 
-![Version](https://img.shields.io/badge/version-v1.5.3-blue)
+![Version](https://img.shields.io/badge/version-v1.5.4-blue)
 ![Status](https://img.shields.io/badge/status-production--ready-green)
-![Tests](https://img.shields.io/badge/tests-66%20passing-success)
+![Tests](https://img.shields.io/badge/tests-72%20passing-success)
 
 ## Overview
 
@@ -14,7 +14,7 @@ A Python-based DVR for the No Agenda stream with time-shifted web playback.
 
 ## Features
 
-All 15 planned features complete as of v1.5.3:
+All 15 planned features complete as of v1.5.4:
 
 | # | Feature | Description |
 |---|---------|-------------|
@@ -32,7 +32,7 @@ All 15 planned features complete as of v1.5.3:
 | 12 | Bug validation | Complete regression test suite |
 | 13 | Slider drag preview | Title shows segment at dragged position |
 | 14a | Slider improvements | Segment-based slider with finer control |
-| 14 | Hamburger menu | Dropdown panel showing all segments |
+| 14 | Hamburger menu | Dropdown panel showing all segments with start time and date |
 
 **Core Capabilities**:
 - **Continuous 24/7 recording** of No Agenda ICY stream
@@ -56,7 +56,7 @@ All 15 planned features complete as of v1.5.3:
 sudo mkdir -p /var/www/html/noAgendaTimeMachine/audio/segments
 
 # Copy files from latest release
-cp -r release/v1.5.3/* /var/www/html/noAgendaTimeMachine/
+cp -r release/v1.5.4/* /var/www/html/noAgendaTimeMachine/
 
 # Set permissions
 sudo chown -R www-data:www-data /var/www/html/noAgendaTimeMachine
@@ -143,7 +143,7 @@ noAgendaTimeMachine/
 ├── TODO.md                            # Feature tracking (15/15 complete)
 ├── .claude/CLAUDE.md                  # Development guidance
 ├── release/                           # Release packages (frozen artifacts)
-│   ├── v1.0.0/ through v1.5.3/       # Versioned releases
+│   ├── v1.0.0/ through v1.5.4/       # Versioned releases
 │   └── README.md
 ├── validation/                        # Development & canonical source
 │   ├── production/                    # CANONICAL SOURCE (edit here)
@@ -156,7 +156,7 @@ noAgendaTimeMachine/
 │   └── CLAUDE.md                      # Development guide
 └── test_validation/                   # Playwright browser tests
     ├── index.html → ../validation/production/index.html (symlink)
-    ├── tests/                         # 67 regression tests
+    ├── tests/                         # 72 regression tests
     └── audio/playlist.json            # Test data
 ```
 
@@ -164,7 +164,7 @@ noAgendaTimeMachine/
 
 ## Testing
 
-**66 Playwright regression tests, all passing**:
+**72 Playwright regression tests, all passing**:
 
 - feature2.spec.js (5 tests) - 12-hour clock format
 - feature6.spec.js (7 tests) - Live button
@@ -174,7 +174,7 @@ noAgendaTimeMachine/
 - bug3.spec.js (8 tests) - Next Track validation
 - feature13.spec.js (7 tests) - Slider drag updates title
 - feature14a.spec.js (10 tests) - Slider improvements
-- feature14.spec.js (10 tests) - Hamburger segment list
+- feature14.spec.js (15 tests) - Hamburger segment list with date display
 
 ```bash
 cd test_validation
@@ -190,7 +190,7 @@ npx playwright test --reporter=list
 | Features | ✅ Complete (15/15) |
 | Production Ready | ✅ Yes |
 
-**Latest Version**: v1.5.3 (2026-07-30)
+**Latest Version**: v1.5.4 (2026-08-01)
 
 **Version History**:
 - v1.0.0 (2026-07-11): Initial production release
@@ -202,6 +202,7 @@ npx playwright test --reporter=list
 - v1.5.0 (2026-07-29): Hamburger segment list (67 tests)
 - v1.5.1 (2026-07-29): Playback stall fix
 - v1.5.2 (2026-07-29): Infinite reload loop fix
+- v1.5.4 (2026-08-01): Date display in hamburger menu
 - v1.5.3 (2026-07-30): Time display stalled & playback skip fixes
 
 **Fixed Bugs**:

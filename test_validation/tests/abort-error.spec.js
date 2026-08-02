@@ -66,10 +66,10 @@ test.describe('AbortError handling (v1.4.3)', () => {
         expect(clickCount).toBeGreaterThanOrEqual(4);
     });
 
-    test('should display version 1.4.3', async ({ page }) => {
+    test('should display version 1.5.4', async ({ page }) => {
         await page.goto('http://localhost:8081');
 
         const versionText = await page.locator('.version-info').textContent();
-        expect(versionText.trim()).toBe('v1.4.3');
+        expect(versionText.trim()).toBe('v1.5.4');
     });
 });

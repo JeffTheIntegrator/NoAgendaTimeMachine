@@ -314,7 +314,7 @@ The recorder handles stream interruptions:
 - Grace period: 30 seconds before closing segment on reconnect
 
 ### Segment Reclamation
-On script restart, Python reclaims existing segments if gap < 30s, preventing orphaned files.
+On script restart, Python always creates a new segment file — existing segments remain on disk until cleaned up by the retention policy (MAX_AGE).
 
 ## Code Style
 

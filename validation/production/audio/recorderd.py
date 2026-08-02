@@ -349,8 +349,8 @@ def record_stream():
 
             # Decide whether to keep segment open or close it
             if current_file is not None:
-                gap = RECONNECT_DELAY_FAST if consecutive_failures <= 2 else RECONNECT_DELAY_SLOW
-                if gap >= RECONNECT_GRACE:
+                actual_gap = time.time() - current_start
+                if actual_gap >= RECONNECT_GRACE:
                     # Gap too long, close segment
                     try:
                         current_file.close()
@@ -358,13 +358,13 @@ def record_stream():
                         pass
                     if current_filepath:
                         write_segment_meta(current_filepath, current_start, time.time(), current_title, final=True)
-                    log.info("seg closed gap-too-long path=%s",
-                             os.path.basename(current_filepath) if current_filepath else None)
+                    log.info("seg closed gap-too-long path=%s gap=%.1fs",
+                             os.path.basename(current_filepath) if current_filepath else None, actual_gap)
                     current_file = None
                     current_filepath = None
                 else:
-                    log.info("seg kept-open for reconnect path=%s",
-                             os.path.basename(current_filepath) if current_filepath else None)
+                    log.info("seg kept-open for reconnect path=%s gap=%.1fs",
+                             os.path.basename(current_filepath) if current_filepath else None, actual_gap)
 
         except KeyboardInterrupt:
             log.info("keyboard-interrupt shutting-down")
@@ -379,6 +379,14 @@ def record_stream():
 
         except Exception as e:
             log.exception("unexpected-error type=%s msg=%s", type(e).__name__, e)
+            # Close any open file handle to prevent FD leaks on retry
+            if current_file is not None:
+                try:
+                    current_file.close()
+                except Exception:
+                    pass
+                current_file = None
+                current_filepath = None
             time.sleep(5)
 
 if __name__ == "__main__":

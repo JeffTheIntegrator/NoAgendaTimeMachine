@@ -12,8 +12,8 @@ NoAgendaTimeMachine is a Python-based DVR for the No Agenda stream. It continuou
 - **Screen launcher** (`start.sh`): Manages recorder in detached screen session
 - **Live edge handling**: Dynamic reloading at the stream's leading edge with fixed 30s offset
 
-**Current Version:** v1.6.1 (Extended retention) - Released 2026-08-02
-**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.6.1 released
+**Current Version:** v1.6.2 (Same-segment seek fix) - Released 2026-08-02
+**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.6.2 released
 
 ## Project Structure
 
@@ -27,9 +27,10 @@ noAgendaTimeMachine/
 │   ├── v1.3.0/                   # 12 features complete
 │   ├── v1.5.4/                   # Date display in hamburger menu
 │   ├── v1.6.0/                   # Security & quality release
-│   ├── v1.6.1/                   # Current - Extended retention (7 days)
+│   ├── v1.6.1/                   # Extended retention (7 days)
+│   ├── v1.6.2/                   # Current - Same-segment seek fix
 │   │   ├── index.html
-│   │   ├── RELEASE_v1.6.0.md
+│   │   ├── RELEASE_v1.6.2.md
 │   │   └── audio/
 │   │       ├── recorderd.py
 │   │       ├── start.sh
@@ -572,6 +573,12 @@ npx playwright test --reporter=list
 - ✅ MAX_AGE increased from 72 hours (3 days) to 7 days (168 hours)
 - ✅ Release package at `release/v1.6.1/`
 
+### Phase 8: Same-Segment Seek Fix (v1.6.2 - 2026-08-02)
+- ✅ Fixed `playSegment()` same-URL path to perform seek instead of returning early
+- ✅ Affected: ±30s, ±10m, ±1h skip buttons, prevTrack, attemptRecovery(), health-check recovery
+- ✅ 76 Playwright regression tests passing
+- ✅ Release package at `release/v1.6.2/`
+
 ## Related Files
 
 - **TODO List**: `TODO.md` - Feature requests (13/14 complete for v1.4.0, #14 pending)
@@ -583,7 +590,8 @@ npx playwright test --reporter=list
   - `release/v1.4.0/` - Feature 13 + simplification (45 tests)
   - `release/v1.5.4/` - Date display in hamburger menu (72 tests)
   - `release/v1.6.0/` - Security & quality release (76 tests)
-  - `release/v1.6.1/` - Current - Extended retention, 7 days (76 tests)
+  - `release/v1.6.1/` - Extended retention, 7 days (76 tests)
+  - `release/v1.6.2/` - Current - Same-segment seek fix (76 tests)
 - **Design Document**: `validation/production/docs/2025-07-04-no-agenda-time-machine-production-design.md`
 - **Testing Report**: `validation/TESTING.md`
 - **Code Review**: `validation/CODE_REVIEW.md` — v1.5.4 review, findings applied in v1.6.0
@@ -592,8 +600,8 @@ npx playwright test --reporter=list
 
 ### Quick Reference
 
-- **Current Release**: `release/v1.6.1/` - Extended retention (7 days), 76 tests passing
-- **Current Version**: v1.6.1 (2026-08-02)
+- **Current Release**: `release/v1.6.2/` - Same-segment seek fix, 76 tests passing
+- **Current Version**: v1.6.2 (2026-08-02)
 - **Bug Validation**: All 6 bugs fixed and validated
 - **Code Review**: v1.5.4 review complete — all findings applied in v1.6.0
 - **Features Implemented** (15/15):

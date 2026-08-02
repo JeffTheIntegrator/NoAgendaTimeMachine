@@ -459,12 +459,12 @@
         </div>
 
         <div class="main-controls">
-            <button class="control-btn" onclick="console.log('[USER] Clicked: Previous track'); prevTrack()" title="Previous track">
+            <button class="control-btn" onclick="console.log('[USER] Clicked: Previous track'); prevTrack()" title="Previous track" aria-label="Previous track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                 </svg>
             </button>
-            <button class="control-btn play-btn" id="play-btn" onclick="console.log('[USER] Clicked: Play/Pause'); togglePlay()" title="Play/Pause">
+            <button class="control-btn play-btn" id="play-btn" onclick="console.log('[USER] Clicked: Play/Pause'); togglePlay()" title="Play/Pause" aria-label="Play">
                 <svg class="icon" id="play-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z"/>
                 </svg>
@@ -472,12 +472,12 @@
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
             </button>
-            <button class="control-btn" onclick="console.log('[USER] Clicked: Next track'); nextTrack()" title="Next track">
+            <button class="control-btn" onclick="console.log('[USER] Clicked: Next track'); nextTrack()" title="Next track" aria-label="Next track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                 </svg>
             </button>
-            <button class="control-btn live-btn" onclick="console.log('[USER] Clicked: Go Live'); goLive()" title="Go to live">
+            <button class="control-btn live-btn" onclick="console.log('[USER] Clicked: Go Live'); goLive()" title="Go to live" aria-label="Go to live">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                 </svg>
@@ -503,11 +503,17 @@
         let segments = [];
         let currentIndex = 0;
         let currentTime = 0;
-        let isPlaying = false;
         let isDragging = false;
         let playbackIntent = false;  // Track user's play intent (independent of actual player state)
         let liveReloadCount = 0;    // Track consecutive live edge reload attempts
         const MAX_LIVE_RELOADS = 3; // Maximum consecutive reloads before fallback
+        let liveBufferRetryCount = 0; // M8: Counter for recursive handleEnded buffer retries
+
+        // M9: Derive playing state from the active player instead of tracking separately
+        const isPlaying = () => {
+            const active = getActive();
+            return !active.paused && !active.ended && !!active.src;
+        };
 
         // Dual-buffer players
         const playerA = new Audio();
@@ -525,6 +531,24 @@
 
         const getActive = () => usePlayerA ? playerA : playerB;
         const getNext = () => usePlayerA ? playerB : playerA;
+
+        // M7: Shared recovery function — eliminates duplicated logic
+        function attemptRecovery(player, playerName, index, offset) {
+            if (player.recoveryCount >= MAX_RECOVERY_ATTEMPTS) {
+                log.e(playerName, 'Max recovery attempts reached, giving up', {
+                    attempts: player.recoveryCount,
+                    max: MAX_RECOVERY_ATTEMPTS
+                });
+                player.recoveryCount = 0;
+                setStatus('Playback error — unable to recover', 'error');
+                return false;
+            }
+            player.recoveryCount++;
+            setStatus('Recovering playback...', 'recovering');
+            log.i(playerName, 'Recovery attempt', { attempt: player.recoveryCount, max: MAX_RECOVERY_ATTEMPTS });
+            setTimeout(() => playSegment(index, Math.max(0, offset), true), 2000);
+            return true;
+        }
 
         const switchPlayer = () => {
             usePlayerA = !usePlayerA;
@@ -607,6 +631,11 @@
         // Track playlist generation to avoid redundant DOM rebuilds (H2)
         let lastGeneratedAt = 0;
         let consecutivePlaylistFailures = 0;
+
+        // M1: Adaptive polling — slow down when playlist is static
+        let consecutiveUnchanged = 0;
+        const ADAPTIVE_INTERVALS = [5000, 10000, 30000, 60000]; // 5s, 10s, 30s, 60s
+        let pollTimer = null;
 
         // ============================================
         // Utilities
@@ -695,6 +724,8 @@
                 const item = document.createElement('div');
                 item.className = 'segment-item';
                 item.dataset.index = originalIndex;
+                item.tabIndex = 0;       // M2: Make focusable for keyboard navigation
+                item.setAttribute('role', 'option');  // M2: ARIA role for listbox option
 
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'segment-item-title';
@@ -725,7 +756,7 @@
         }
 
         function setupSegmentListHandlers() {
-            // Segment item click handler
+            // Segment item click handler (also handles keyboard Enter/Space)
             UI.segmentList.addEventListener('click', (e) => {
                 const item = e.target.closest('.segment-item');
                 if (!item) return;
@@ -738,11 +769,35 @@
                 }
             });
 
+            // M2: Keyboard support for segment items (Enter/Space to select)
+            UI.segmentList.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const item = e.target.closest('.segment-item');
+                    if (!item) return;
+                    const index = parseInt(item.dataset.index);
+                    if (segments[index]) {
+                        console.log('[USER] Segment list: keyboard selected segment', index);
+                        seekToTime(segments[index].start);
+                        toggleSegmentList();
+                    }
+                }
+            });
+
             // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!UI.segmentDropdown.contains(e.target) && !UI.hamburgerBtn.contains(e.target)) {
                     UI.segmentDropdown.classList.remove('show');
                     UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // M2: Escape key closes dropdown and returns focus to hamburger button
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && UI.segmentDropdown.classList.contains('show')) {
+                    UI.segmentDropdown.classList.remove('show');
+                    UI.hamburgerBtn.setAttribute('aria-expanded', 'false');
+                    UI.hamburgerBtn.focus();
                 }
             });
 
@@ -785,6 +840,9 @@
                 if (data.generated_at !== lastGeneratedAt) {
                     lastGeneratedAt = data.generated_at;
                     renderSegmentList();
+                    consecutiveUnchanged = 0;  // M1: Reset adaptive counter
+                } else {
+                    consecutiveUnchanged++;  // M1: Increase adaptive delay
                 }
             } catch (e) {
                 const err = `Playlist error: ${e.message}`;
@@ -840,7 +898,10 @@
             active.onerror = null;
 
             // Check if player already has this source loaded (avoid redundant load)
-            if (active.src && active.src === url) {
+            // Compare absolute URLs since active.src returns the resolved absolute URL
+            const activeAbsUrl = active.src ? new URL(active.src, window.location.href).href : null;
+            const requestedAbsUrl = new URL(url, window.location.href).href;
+            if (activeAbsUrl === requestedAbsUrl) {
                 log.d(playerName, 'Source already loaded, skipping redundant load');
                 // Clear any pending timeout for this player since we're not loading
                 const timeoutRef = active === playerA ? playerATimeout : playerBTimeout;
@@ -868,36 +929,7 @@
 
                 // Attempt recovery: reload the segment after a delay
                 if (shouldPlay) {
-                    // Check recovery counter to prevent infinite loops
-                    if (active.recoveryCount >= MAX_RECOVERY_ATTEMPTS) {
-                        log.e(playerName, 'Max recovery attempts reached, giving up', {
-                            attempts: active.recoveryCount,
-                            max: MAX_RECOVERY_ATTEMPTS
-                        });
-                        recordError('playback', 'recovery_max_attempts', {
-                            player: playerName,
-                            attempts: active.recoveryCount,
-                            index,
-                            url
-                        });
-                        active.recoveryCount = 0;  // Reset for future attempts
-                        setStatus('Playback error — unable to recover', 'error');
-                        return;
-                    }
-
-                    active.recoveryCount++;
-                    setStatus('Buffering...', 'recovering');
-                    log.i(playerName, 'Attempting load recovery - will retry in 2s', {
-                        attempt: active.recoveryCount,
-                        max: MAX_RECOVERY_ATTEMPTS
-                    });
-                    setTimeout(() => {
-                        log.i(playerName, 'Retrying segment load', {
-                            attempt: active.recoveryCount,
-                            max: MAX_RECOVERY_ATTEMPTS
-                        });
-                        playSegment(index, offset, shouldPlay);
-                    }, 2000);
+                    attemptRecovery(active, playerName, index, offset);
                 }
             };
 
@@ -1157,7 +1189,6 @@
             if (isLast && isLive) {
                 // Live edge - reload with offset
                 log.i('Live edge reload - attempting to maintain playback');
-                isPlaying = false;
 
                 const seg = segments[currentIndex];
                 if (!seg) {
@@ -1208,6 +1239,16 @@
                                 liveEdgeOffset: LIVE_EDGE_OFFSET
                             });
                             liveReloadCount++;
+                            // M8: Limit recursive buffer retries to prevent infinite loops
+                            if (liveBufferRetryCount >= MAX_LIVE_RELOADS) {
+                                log.w('Live edge buffer retry - exceeded max attempts, falling back');
+                                liveBufferRetryCount = 0;
+                                liveReloadCount = 0;
+                                playSegment(currentIndex, 0, playbackIntent);
+                                updateUI();
+                                return;
+                            }
+                            liveBufferRetryCount++;
                             // Retry after a short delay to allow more data to buffer
                             setTimeout(() => {
                                 if (segments[currentIndex]) {
@@ -1256,8 +1297,9 @@
                     offset = segDuration - LIVE_EDGE_OFFSET;
                 }
 
-                // Reset reload counter on successful reload
+                // Reset reload counters on successful reload
                 liveReloadCount = 0;
+                liveBufferRetryCount = 0;
 
                 log.state('LIVE_RELOAD', {
                     segStart: seg.start,
@@ -1310,6 +1352,9 @@
                 UI.pauseIcon.style.display = 'block';
             }
 
+            // M3: Update play/pause aria-label for screen readers
+            UI.playBtn.setAttribute('aria-label', isPaused ? 'Play' : 'Pause');
+
             // Track title
             if (segments[currentIndex]) {
                 UI.trackTitle.textContent = segments[currentIndex].title || 'No Agenda Stream';
@@ -1331,6 +1376,7 @@
                 currentTime = segments[currentIndex].start + active.currentTime;
                 if (!isDragging) {
                     UI.timeline.value = currentIndex;
+                    UI.timeline.setAttribute('aria-valuetext', fmtTime12Hour(currentTime));  // M3
                     UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
                     UI.dateDisplay.textContent = fmtDate(currentTime);
                 }
@@ -1350,6 +1396,7 @@
                 UI.timeDisplay.textContent = fmtTime12Hour(seg.start);
                 UI.dateDisplay.textContent = fmtDate(seg.start);
                 UI.trackTitle.textContent = seg.title || 'No Agenda Stream';
+                UI.timeline.setAttribute('aria-valuetext', fmtTime12Hour(seg.start));  // M3
                 currentTime = seg.start;
             }
         });
@@ -1406,21 +1453,18 @@
 
             p.addEventListener('play', () => {
                 log.state(playerName, 'PLAY', { currentTime: p.currentTime });
-                isPlaying = true;
                 playbackIntent = true;  // Sync intent with actual state
                 updateUI();
             });
 
             p.addEventListener('pause', () => {
                 log.state(playerName, 'PAUSE', { currentTime: p.currentTime });
-                isPlaying = false;
                 // Don't clear playbackIntent - it represents user's intent, not current state
                 updateUI();
             });
 
             p.addEventListener('playing', () => {
                 log.state(playerName, 'PLAYING', { currentTime: p.currentTime });
-                isPlaying = true;  // Confirm we're actually playing
                 setStatus('');  // Clear any recovering/error status
                 updateUI();
             });
@@ -1428,15 +1472,14 @@
             p.addEventListener('waiting', () => {
                 log.state(playerName, 'WAITING', { currentTime: p.currentTime });
                 log.w(playerName, 'is waiting for data');
-                isPlaying = false;  // Update state - not playing while waiting
                 updateUI();
             });
 
             p.addEventListener('stalled', () => {
                 log.state(playerName, 'STALLED', { currentTime: p.currentTime });
-                log.w(playerName, 'playback stalled -可能 buffer underrun');
+                log.w(playerName, 'playback stalled - possible buffer underrun');
                 recordError('playback', 'stalled', { player: playerName, currentTime: p.currentTime });
-                isPlaying = false;  // Update state - not playing while stalled
+                setStatus('Buffering...', 'recovering');
                 updateUI();
             });
 
@@ -1454,42 +1497,18 @@
 
                 // Attempt recovery: reload current segment
                 if (!p.paused && segments[currentIndex]) {
-                    // Check recovery counter to prevent infinite loops
-                    if (p.recoveryCount >= MAX_RECOVERY_ATTEMPTS) {
-                        log.e(playerName, 'Max recovery attempts reached in event handler, giving up', {
-                            attempts: p.recoveryCount,
-                            max: MAX_RECOVERY_ATTEMPTS
-                        });
-                        recordError('playback', 'event_recovery_max_attempts', {
-                            player: playerName,
-                            attempts: p.recoveryCount,
-                            index: currentIndex
-                        });
-                        p.recoveryCount = 0;  // Reset for future attempts
-                        setStatus('Audio error — unable to recover', 'error');
-                        return;
-                    }
-
-                    p.recoveryCount++;
-                    setStatus('Recovering playback...', 'recovering');
-                    log.i(playerName, 'Attempting error recovery - reload current segment', {
-                        attempt: p.recoveryCount,
-                        max: MAX_RECOVERY_ATTEMPTS
-                    });
                     const seg = segments[currentIndex];
                     const offset = currentTime - seg.start;
-                    setTimeout(() => {
-                        log.i(playerName, 'Retrying segment load in event handler', {
-                            attempt: p.recoveryCount,
-                            max: MAX_RECOVERY_ATTEMPTS
-                        });
-                        playSegment(currentIndex, Math.max(0, offset), true);
-                    }, 1000);
+                    attemptRecovery(p, playerName, currentIndex, Math.max(0, offset));
                 }
             });
 
+            let lastProgressLog = 0;
             p.addEventListener('progress', () => {
-                // Log buffer progress periodically
+                // M10: Throttle buffer progress log to at most once per second
+                const now = Date.now();
+                if (now - lastProgressLog < 1000) return;
+                lastProgressLog = now;
                 if (p.buffered.length > 0) {
                     const bufEnd = p.buffered.end(p.buffered.length - 1);
                     log.buffer(playerName, bufEnd, p.duration);
@@ -1500,14 +1519,6 @@
                 // Log every 10 seconds for long-running monitoring
                 if (Math.floor(p.currentTime) % 10 === 0 && Math.floor(p.currentTime) > 0) {
                     log.d(playerName, 'timeupdate', { currentTime: p.currentTime.toFixed(1), duration: p.duration?.toFixed(1) });
-                }
-
-                // Update time display on each timeupdate for smoother updates
-                // This provides more responsive time display (timeupdate fires ~4 times per second)
-                if (segments[currentIndex] && !isDragging && usePlayerA === (p === playerA)) {
-                    currentTime = segments[currentIndex].start + p.currentTime;
-                    UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
-                    UI.dateDisplay.textContent = fmtDate(currentTime);
                 }
             });
 
@@ -1548,8 +1559,16 @@
             UI.timeDisplay.textContent = fmtTime12Hour(currentTime);
             UI.dateDisplay.textContent = fmtDate(currentTime);
 
-            // Start playlist polling
-            setInterval(fetchPlaylist, POLL_INTERVAL);
+            // M1: Adaptive playlist polling — slows down when playlist is static
+            function scheduleNextPoll() {
+                const idx = Math.min(consecutiveUnchanged, ADAPTIVE_INTERVALS.length - 1);
+                const interval = ADAPTIVE_INTERVALS[idx];
+                pollTimer = setTimeout(async () => {
+                    await fetchPlaylist();
+                    scheduleNextPoll();
+                }, interval);
+            }
+            scheduleNextPoll();
 
             // Setup segment list handlers
             setupSegmentListHandlers();
@@ -1560,11 +1579,11 @@
                 const now = Date.now();
                 const timeSinceHealthCheck = (now - lastHealthCheck) / 1000;
 
-                // Check if player appears stuck (paused but should be playing)
-                if (isPlaying && active.paused && active.src) {
-                    log.w('Health check: playing=true but paused=true - possible issue');
+                // Check if player appears stuck (paused but user wants playback)
+                if (playbackIntent && active.paused && active.src) {
+                    log.w('Health check: playbackIntent=true but paused=true - possible issue');
                     recordError('playback', 'health_check_stuck', {
-                        isPlaying,
+                        playbackIntent,
                         paused: active.paused,
                         hasSrc: !!active.src,
                         currentIndex

@@ -651,27 +651,52 @@
         }
 
         function renderSegmentList() {
+            // Clear existing list (safe: no innerHTML with external data)
+            UI.segmentList.replaceChildren();
+
             if (!segments.length) {
-                UI.segmentList.innerHTML = '<div class="segment-item">No segments available</div>';
+                const empty = document.createElement('div');
+                empty.className = 'segment-item';
+                empty.textContent = 'No segments available';
+                UI.segmentList.appendChild(empty);
                 return;
             }
 
             // Create items in reverse order (newest first)
-            const items = segments.slice().reverse().map((seg, idx) => {
+            const reversed = segments.slice().reverse();
+            reversed.forEach((seg, idx) => {
                 const originalIndex = segments.length - 1 - idx;
-                return `
-                    <div class="segment-item" data-index="${originalIndex}">
-                        <span class="segment-item-title">${seg.title || 'No Agenda Stream'}</span>
-                        <span class="segment-item-meta">
-                            <span class="segment-item-time">${fmtTime12Hour(seg.start)}</span>
-                            <span>·</span>
-                            <span class="segment-item-date">${fmtSegmentDate(seg.start)}</span>
-                        </span>
-                    </div>
-                `;
-            }).join('');
 
-            UI.segmentList.innerHTML = items;
+                const item = document.createElement('div');
+                item.className = 'segment-item';
+                item.dataset.index = originalIndex;
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'segment-item-title';
+                titleSpan.textContent = seg.title || 'No Agenda Stream';
+
+                const metaDiv = document.createElement('span');
+                metaDiv.className = 'segment-item-meta';
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'segment-item-time';
+                timeSpan.textContent = fmtTime12Hour(seg.start);
+
+                const dot = document.createElement('span');
+                dot.textContent = ' · ';
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'segment-item-date';
+                dateSpan.textContent = fmtSegmentDate(seg.start);
+
+                metaDiv.appendChild(timeSpan);
+                metaDiv.appendChild(dot);
+                metaDiv.appendChild(dateSpan);
+
+                item.appendChild(titleSpan);
+                item.appendChild(metaDiv);
+                UI.segmentList.appendChild(item);
+            });
         }
 
         function setupSegmentListHandlers() {

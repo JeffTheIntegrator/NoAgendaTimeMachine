@@ -4,6 +4,7 @@
 **Reviewer:** Senior Engineer Review
 **Scope:** Full codebase — JavaScript/HTML frontend (primary), Python backend (moderate), shell launcher (light)
 **Version Reviewed:** v1.5.4 (validation/production/ — canonical source)
+**Status:** All findings applied — released as v1.6.0 (2026-08-02)
 
 ---
 

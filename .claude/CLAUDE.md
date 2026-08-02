@@ -12,8 +12,8 @@ NoAgendaTimeMachine is a Python-based DVR for the No Agenda stream. It continuou
 - **Screen launcher** (`start.sh`): Manages recorder in detached screen session
 - **Live edge handling**: Dynamic reloading at the stream's leading edge with fixed 30s offset
 
-**Current Version:** v1.5.4 (Date display in hamburger menu) - Released 2026-08-01
-**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.5.4 released
+**Current Version:** v1.6.0 (Security & quality release) - Released 2026-08-02
+**Project Status:** ✅ All 6 bugs fixed, 15/15 features complete - v1.6.0 released
 
 ## Project Structure
 
@@ -25,9 +25,10 @@ noAgendaTimeMachine/
 │   ├── v1.1.0/                   # Light theme release
 │   ├── v1.2.0/                   # UI improvements
 │   ├── v1.3.0/                   # 12 features complete
-│   ├── v1.5.4/                   # Current - Date display in hamburger menu
+│   ├── v1.5.4/                   # Date display in hamburger menu
+│   ├── v1.6.0/                   # Current - Security & quality release
 │   │   ├── index.html
-│   │   ├── RELEASE_v1.5.4.md
+│   │   ├── RELEASE_v1.6.0.md
 │   │   └── audio/
 │   │       ├── recorderd.py
 │   │       ├── start.sh
@@ -340,7 +341,7 @@ audio/segments/*.mp3 → plays audio
 - `test_validation/index.html` is now symlink → `../validation/production/index.html` (or copy if symlink unavailable)
 - Release artifacts (`release/v1.*/`) remain frozen and untouched
 
-**Regression Tests:** 72 Playwright tests, all passing (v1.5.4)
+**Regression Tests:** 76 Playwright tests, all passing (v1.6.0)
 
 ### Known Issues & Considerations
 
@@ -556,30 +557,43 @@ npx playwright test --reporter=list
 - ✅ 45 Playwright regression tests, all passing (38 + 7 new)
 - ✅ Release package at `release/v1.4.0/`
 
+### Phase 6: Security & Quality (v1.6.0 - 2026-08-02)
+- ✅ Phase 1: XSS fix — `innerHTML` replaced with DOM API in `renderSegmentList()` (+4 security tests)
+- ✅ Phase 2: User-visible error feedback (`setStatus()`), DOM efficiency (`lastGeneratedAt`), preload optimization
+- ✅ Phase 3: Adaptive polling (5s→60s), accessibility (ARIA labels, keyboard nav), correctness fixes (`isPlaying` function, same-segment seek)
+- ✅ Phase 4: Code cleanup — inline `onclick` → event listeners, shared `attemptRecovery()`, Map-based recovery tracking, dead code removal
+- ✅ Phase 5: Python fixes — reconnection gap uses actual elapsed time, FD leak fix on retry
+- ✅ 76 Playwright regression tests, all passing (72 + 4 new XSS tests)
+- ✅ Code review findings from v1.5.4 applied
+- ✅ Release package at `release/v1.6.0/`
+
 ## Related Files
 
 - **TODO List**: `TODO.md` - Feature requests (13/14 complete for v1.4.0, #14 pending)
-- **Release Notes**: `release/v1.4.0/RELEASE_v1.4.0.md` - v1.4.0 release summary
+- **Release Notes**: `release/v1.6.0/RELEASE_v1.6.0.md` - v1.6.0 release summary
 - **Release Packages**:
   - `release/v1.1.0/` - Light theme
   - `release/v1.2.0/` - UI improvements (7/12)
   - `release/v1.3.0/` - 12 features complete (38 tests)
-  - `release/v1.4.0/` - Current - Feature 13 + simplification (45 tests)
+  - `release/v1.4.0/` - Feature 13 + simplification (45 tests)
+  - `release/v1.5.4/` - Date display in hamburger menu (72 tests)
+  - `release/v1.6.0/` - Current - Security & quality release (76 tests)
 - **Design Document**: `validation/production/docs/2025-07-04-no-agenda-time-machine-production-design.md`
 - **Testing Report**: `validation/TESTING.md`
-- **Bug Fix Summary**: `validation/tests/BUG_FIX_SUMMARY.md`
-- **Playwright Tests**: `test_validation/tests/` - feature2, feature6, feature8, feature9, feature10, bug3, feature13 specs (45 tests)
-- **Previous Releases**: `release/v1.1.0/`, `release/v1.2.0/`, `release/v1.3.0/`
+- **Code Review**: `validation/CODE_REVIEW.md` — v1.5.4 review, findings applied in v1.6.0
+- **Playwright Tests**: `test_validation/tests/` - feature2, feature6, feature8, feature9, feature10, bug3, feature13, feature14, slider-improvements, abort-error, code-review-xss specs (76 tests)
+- **Previous Releases**: `release/v1.1.0/`, `release/v1.2.0/`, `release/v1.3.0/`, `release/v1.4.0/`, `release/v1.5.4/`
 
 ### Quick Reference
 
-- **Current Release**: `release/v1.5.4/` - Date display in hamburger menu, 72 tests passing
-- **Current Version**: v1.5.4 (2026-08-01)
-- **Bug Validation**: All 3 bugs fixed and validated
-- **Features Implemented** (13/14):
+- **Current Release**: `release/v1.6.0/` - Security & quality release, 76 tests passing
+- **Current Version**: v1.6.0 (2026-08-02)
+- **Bug Validation**: All 6 bugs fixed and validated
+- **Code Review**: v1.5.4 review complete — all findings applied in v1.6.0
+- **Features Implemented** (15/15):
   - Remove green bar (1), 12-hour clock (2), Fixed title height (3), Prevent zoom (4)
   - Remove status (5), Live button (6), Update heading (7), White text (8)
   - Equal sizes (9), Larger slider (10), Light theme (11), Bug3 validation (12)
-  - Slider drag title (13), Hamburger list (14 - pending)
+  - Slider drag title (13), Slider improvements (14a), Hamburger list (14)
 - **Simplification**: 3 live copies → 1 canonical (validation/production/) + symlink (test_validation/)
-- **Regression Tests**: 72 tests - feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8), feature13 (7), feature14a (10), abort-error (3), feature14 (15)
+- **Regression Tests**: 76 tests — feature2 (5), feature6 (7), feature8 (6), feature9 (6), feature10 (6), bug3 (8), feature13 (7), slider-improvements (10), abort-error (3), feature14 (15), code-review-xss (4)

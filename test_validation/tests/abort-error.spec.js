@@ -70,6 +70,6 @@ test.describe('AbortError handling (v1.4.3)', () => {
         await page.goto('http://localhost:8081');
 
         const versionText = await page.locator('.version-info').textContent();
-        expect(versionText.trim()).toBe('v1.5.4');
+        expect(versionText.trim()).toBe('v1.6.0');
     });
 });

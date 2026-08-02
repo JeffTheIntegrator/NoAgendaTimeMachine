@@ -267,8 +267,9 @@
 
         .segment-item {
             display: flex;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
             padding: 12px;
             cursor: pointer;
             border-radius: 8px;
@@ -279,20 +280,22 @@
             background: #f5f5f5;
         }
 
-        .segment-item-time {
+        .segment-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
             font-size: 12px;
             color: var(--text-muted);
-            min-width: 60px;
         }
 
         .segment-item-title {
             font-size: 14px;
             color: var(--text-primary);
+            max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            flex: 1;
         }
 
         /* Scrollbar styling for segment list */
@@ -469,7 +472,7 @@
             </button>
         </div>
         <div class="version-info" style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
-            v1.5.3
+            v1.5.4
         </div>
     </div>
 
@@ -621,6 +624,17 @@
             return `${dayName} ${month} ${day}`;
         }
 
+        // Date with "Today" for current-day segments (hamburger menu, v1.5.4)
+        function fmtSegmentDate(unix) {
+            if (!unix) return '';
+            const segDate = new Date(unix * 1000);
+            const now = new Date();
+            const isToday = segDate.getFullYear() === now.getFullYear() &&
+                            segDate.getMonth() === now.getMonth() &&
+                            segDate.getDate() === now.getDate();
+            return isToday ? 'Today' : fmtDate(unix);
+        }
+
         function segIndexForTime(t) {
             if (!segments.length) return 0;
             // Iterate backwards to prefer later segment when timestamps overlap
@@ -647,8 +661,12 @@
                 const originalIndex = segments.length - 1 - idx;
                 return `
                     <div class="segment-item" data-index="${originalIndex}">
-                        <span class="segment-item-time">${fmtTime12Hour(seg.start).split(' ')[0]}</span>
                         <span class="segment-item-title">${seg.title || 'No Agenda Stream'}</span>
+                        <span class="segment-item-meta">
+                            <span class="segment-item-time">${fmtTime12Hour(seg.start)}</span>
+                            <span>·</span>
+                            <span class="segment-item-date">${fmtSegmentDate(seg.start)}</span>
+                        </span>
                     </div>
                 `;
             }).join('');

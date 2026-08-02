@@ -74,6 +74,17 @@
             -webkit-box-orient: vertical;
         }
 
+        .status-indicator {
+            text-align: center;
+            font-size: 12px;
+            min-height: 18px;
+            margin-top: 4px;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+        .status-indicator.error { color: var(--danger); }
+        .status-indicator.recovering { color: var(--accent); }
+
         /* Time Display */
         .time-display {
             font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
@@ -422,6 +433,7 @@
                 </svg>
             </button>
             <div class="track-title" id="track-title">Loading stream...</div>
+            <div class="status-indicator" id="status-indicator" aria-live="polite"></div>
         </div>
 
         <div class="segment-dropdown" id="segment-dropdown">
@@ -551,7 +563,8 @@
             pauseIcon: document.getElementById('pause-icon'),
             hamburgerBtn: document.getElementById('hamburger-btn'),
             segmentDropdown: document.getElementById('segment-dropdown'),
-            segmentList: document.getElementById('segment-list')
+            segmentList: document.getElementById('segment-list'),
+            statusIndicator: document.getElementById('status-indicator')
         };
 
         // ============================================
@@ -582,6 +595,18 @@
             if (playbackErrors.length > 10) playbackErrors.shift();
             if (networkErrors.length > 10) networkErrors.shift();
         }
+
+        // Status indicator for user-visible feedback (H1)
+        function setStatus(message, type) {
+            UI.statusIndicator.textContent = message || '';
+            UI.statusIndicator.className = 'status-indicator';
+            if (type) UI.statusIndicator.classList.add(type);
+            if (message) log.i('Status:', message, type || 'info');
+        }
+
+        // Track playlist generation to avoid redundant DOM rebuilds (H2)
+        let lastGeneratedAt = 0;
+        let consecutivePlaylistFailures = 0;
 
         // ============================================
         // Utilities
@@ -742,20 +767,34 @@
                     log.w(err);
                     recordError('network', 'playlist_fetch', { status: resp.status, url });
                     log.network('FETCH_ERROR', url, resp.status);
+                    consecutivePlaylistFailures++;
+                    if (consecutivePlaylistFailures >= 3) {
+                        setStatus('Unable to reach server — retrying', 'error');
+                    }
                     return;
                 }
                 const data = await resp.json();
+                consecutivePlaylistFailures = 0;
+                setStatus('');  // Clear any error status
                 const prevCount = segments.length;
                 segments = data.segments || [];
                 log.i('Playlist updated:', prevCount, '->', segments.length, 'segments');
                 log.network('FETCH_SUCCESS', url, resp.status);
                 updateTimeline();
-                renderSegmentList();
+                // Only re-render if playlist actually changed (H2)
+                if (data.generated_at !== lastGeneratedAt) {
+                    lastGeneratedAt = data.generated_at;
+                    renderSegmentList();
+                }
             } catch (e) {
                 const err = `Playlist error: ${e.message}`;
                 log.w(err);
                 recordError('network', 'playlist_parse', { error: e.message, url });
                 log.network('FETCH_ERROR', url, 'exception');
+                consecutivePlaylistFailures++;
+                if (consecutivePlaylistFailures >= 3) {
+                    setStatus('Network error — retrying', 'error');
+                }
             }
         }
 
@@ -842,10 +881,12 @@
                             url
                         });
                         active.recoveryCount = 0;  // Reset for future attempts
+                        setStatus('Playback error — unable to recover', 'error');
                         return;
                     }
 
                     active.recoveryCount++;
+                    setStatus('Buffering...', 'recovering');
                     log.i(playerName, 'Attempting load recovery - will retry in 2s', {
                         attempt: active.recoveryCount,
                         max: MAX_RECOVERY_ATTEMPTS
@@ -941,6 +982,7 @@
                 originalHandler.apply(this, args);
             };
 
+            active.preload = 'auto';  // H3: Switch to full download when player becomes active
             active.load();
         }
 
@@ -1246,6 +1288,8 @@
                 // End of playlist
                 log.state('END_OF_PLAYLIST', { currentIndex, total: segments.length });
                 recordError('playback', 'end_of_playlist', { currentIndex, total: segments.length });
+                playbackIntent = false;
+                setStatus('End of playlist', 'info');
             }
             updateUI();
         }
@@ -1274,8 +1318,10 @@
 
         function updateTimeline() {
             if (!segments.length) return;
-            UI.timeline.min = 0;
-            UI.timeline.max = segments.length - 1;
+            const newMax = segments.length - 1;
+            if (UI.timeline.max !== String(newMax)) {
+                UI.timeline.max = newMax;
+            }
         }
 
         // Heartbeat - update time display
@@ -1375,6 +1421,7 @@
             p.addEventListener('playing', () => {
                 log.state(playerName, 'PLAYING', { currentTime: p.currentTime });
                 isPlaying = true;  // Confirm we're actually playing
+                setStatus('');  // Clear any recovering/error status
                 updateUI();
             });
 
@@ -1419,10 +1466,12 @@
                             index: currentIndex
                         });
                         p.recoveryCount = 0;  // Reset for future attempts
+                        setStatus('Audio error — unable to recover', 'error');
                         return;
                     }
 
                     p.recoveryCount++;
+                    setStatus('Recovering playback...', 'recovering');
                     log.i(playerName, 'Attempting error recovery - reload current segment', {
                         attempt: p.recoveryCount,
                         max: MAX_RECOVERY_ATTEMPTS
@@ -1462,7 +1511,7 @@
                 }
             });
 
-            p.preload = 'auto';
+            p.preload = 'metadata';  // H3: metadata-only for inactive player, switched to auto when active
         });
 
         // ============================================

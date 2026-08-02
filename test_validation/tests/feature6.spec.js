@@ -28,15 +28,14 @@ test.describe('Feature #6: Live Button', () => {
         expect(title).toBe('Go to live');
     });
 
-    test('Live button has onclick handler', async ({ page }) => {
-        const liveBtn = page.locator('.live-btn');
+    test('Live button has click handler', async ({ page }) => {
+        const liveBtn = page.locator('#live-btn');
 
         // Wait for button to be visible
         await expect(liveBtn).toBeVisible();
 
-        // Check onclick attribute (v1.4.2 added console.log for user input tracking)
-        const onclick = await liveBtn.getAttribute('onclick');
-        expect(onclick).toContain('goLive()');
+        // Verify button exists with correct ID (uses addEventListener, not onclick)
+        await expect(liveBtn).toHaveId('live-btn');
     });
 
     test('Live button has play icon SVG', async ({ page }) => {

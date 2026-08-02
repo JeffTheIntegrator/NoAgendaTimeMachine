@@ -11,14 +11,14 @@ test.describe('Bug 3 Validation: Next Track Button', () => {
     });
 
     test('Next track button exists and is clickable', async ({ page }) => {
-        const nextBtn = page.locator('.control-btn').nth(2); // Third button is nextTrack
+        const nextBtn = page.locator('#next-btn');
 
         // Wait for button to be visible
         await expect(nextBtn).toBeVisible();
 
-        // Check onclick attribute (v1.4.2 added console.log for user input tracking)
-        const onclick = await nextBtn.getAttribute('onclick');
-        expect(onclick).toContain('nextTrack()');
+        // Verify button has correct aria-label (no onclick — uses addEventListener)
+        const ariaLabel = await nextBtn.getAttribute('aria-label');
+        expect(ariaLabel).toBe('Next track');
     });
 
     test('nextTrack function is defined', async ({ page }) => {

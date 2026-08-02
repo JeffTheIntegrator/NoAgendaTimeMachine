@@ -450,21 +450,21 @@
         </div>
 
         <div class="jump-controls">
-            <button class="jump-btn" onclick="console.log('[USER] Skip: -30s'); skip(-30)">-30s</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: -10m'); skip(-600)">-10m</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: -1h'); skip(-3600)">-1h</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: +30s'); skip(30)">+30s</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: +10m'); skip(600)">+10m</button>
-            <button class="jump-btn" onclick="console.log('[USER] Skip: +1h'); skip(3600)">+1h</button>
+            <button class="jump-btn" data-skip="-30">-30s</button>
+            <button class="jump-btn" data-skip="-600">-10m</button>
+            <button class="jump-btn" data-skip="-3600">-1h</button>
+            <button class="jump-btn" data-skip="30">+30s</button>
+            <button class="jump-btn" data-skip="600">+10m</button>
+            <button class="jump-btn" data-skip="3600">+1h</button>
         </div>
 
         <div class="main-controls">
-            <button class="control-btn" onclick="console.log('[USER] Clicked: Previous track'); prevTrack()" title="Previous track" aria-label="Previous track">
+            <button class="control-btn" id="prev-btn" title="Previous track" aria-label="Previous track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                 </svg>
             </button>
-            <button class="control-btn play-btn" id="play-btn" onclick="console.log('[USER] Clicked: Play/Pause'); togglePlay()" title="Play/Pause" aria-label="Play">
+            <button class="control-btn play-btn" id="play-btn" title="Play/Pause" aria-label="Play">
                 <svg class="icon" id="play-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z"/>
                 </svg>
@@ -472,12 +472,12 @@
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
             </button>
-            <button class="control-btn" onclick="console.log('[USER] Clicked: Next track'); nextTrack()" title="Next track" aria-label="Next track">
+            <button class="control-btn" id="next-btn" title="Next track" aria-label="Next track">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
                 </svg>
             </button>
-            <button class="control-btn live-btn" onclick="console.log('[USER] Clicked: Go Live'); goLive()" title="Go to live" aria-label="Go to live">
+            <button class="control-btn live-btn" id="live-btn" title="Go to live" aria-label="Go to live">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
                 </svg>
@@ -524,9 +524,10 @@
         let playerATimeout = null;
         let playerBTimeout = null;
 
-        // Add recovery counters to player objects
-        playerA.recoveryCount = 0;
-        playerB.recoveryCount = 0;
+        // L6: Use Map for recovery counters instead of attaching to Audio objects
+        const recoveryCounts = new Map();
+        recoveryCounts.set(playerA, 0);
+        recoveryCounts.set(playerB, 0);
         const MAX_RECOVERY_ATTEMPTS = 3;  // Max consecutive recovery attempts per player
 
         const getActive = () => usePlayerA ? playerA : playerB;
@@ -534,18 +535,19 @@
 
         // M7: Shared recovery function — eliminates duplicated logic
         function attemptRecovery(player, playerName, index, offset) {
-            if (player.recoveryCount >= MAX_RECOVERY_ATTEMPTS) {
+            const count = recoveryCounts.get(player) || 0;
+            if (count >= MAX_RECOVERY_ATTEMPTS) {
                 log.e(playerName, 'Max recovery attempts reached, giving up', {
-                    attempts: player.recoveryCount,
+                    attempts: count,
                     max: MAX_RECOVERY_ATTEMPTS
                 });
-                player.recoveryCount = 0;
+                recoveryCounts.set(player, 0);
                 setStatus('Playback error — unable to recover', 'error');
                 return false;
             }
-            player.recoveryCount++;
+            recoveryCounts.set(player, count + 1);
             setStatus('Recovering playback...', 'recovering');
-            log.i(playerName, 'Recovery attempt', { attempt: player.recoveryCount, max: MAX_RECOVERY_ATTEMPTS });
+            log.i(playerName, 'Recovery attempt', { attempt: count + 1, max: MAX_RECOVERY_ATTEMPTS });
             setTimeout(() => playSegment(index, Math.max(0, offset), true), 2000);
             return true;
         }
@@ -583,6 +585,9 @@
             dateDisplay: document.getElementById('date-display'),
             timeline: document.getElementById('timeline'),
             playBtn: document.getElementById('play-btn'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            liveBtn: document.getElementById('live-btn'),
             playIcon: document.getElementById('play-icon'),
             pauseIcon: document.getElementById('pause-icon'),
             hamburgerBtn: document.getElementById('hamburger-btn'),
@@ -640,16 +645,6 @@
         // ============================================
         // Utilities
         // ============================================
-        function fmtTime(unix) {
-            if (!unix) return '--:--:--';
-            return new Date(unix * 1000).toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
         // 12-hour time format (Feature #2)
         function fmtTime12Hour(unix) {
             if (!unix) return '--:--:--';
@@ -934,8 +929,16 @@
             };
 
             active.onloadedmetadata = () => {
+                // Clear metadata timeout since we got the metadata successfully
+                clearTimeout(metadataTimeout);
+                if (active === playerA) {
+                    playerATimeout = null;
+                } else {
+                    playerBTimeout = null;
+                }
+
                 // Reset recovery counter on successful load
-                active.recoveryCount = 0;
+                recoveryCounts.set(active, 0);
 
                 if (!active.duration || active.duration === 0 || !isFinite(active.duration)) {
                     log.e(playerName, 'Invalid duration after load:', active.duration);
@@ -1001,19 +1004,6 @@
                 playerBTimeout = metadataTimeout;
             }
 
-            // Clear timeout when metadata loads
-            const originalHandler = active.onloadedmetadata;
-            active.onloadedmetadata = function(...args) {
-                clearTimeout(metadataTimeout);
-                // Also clear the tracking reference
-                if (active === playerA) {
-                    playerATimeout = null;
-                } else {
-                    playerBTimeout = null;
-                }
-                originalHandler.apply(this, args);
-            };
-
             active.preload = 'auto';  // H3: Switch to full download when player becomes active
             active.load();
         }
@@ -1058,19 +1048,28 @@
                 offset = Math.max(0, Math.min(offset, segDuration));
             }
 
-            // Pause current player and switch to the other one for new segment
-            const currentActive = getActive();
-            currentActive.pause();
+            // L5: Avoid unnecessary player switch when staying on same segment
+            // Only switch players when changing to a different segment
+            if (idx !== currentIndex) {
+                const currentActive = getActive();
+                currentActive.pause();
 
-            // Switch player before loading new segment (dual-buffer architecture)
-            const newPlayer = switchPlayer();
+                // Switch player before loading new segment (dual-buffer architecture)
+                const newPlayer = switchPlayer();
 
-            log.i('seekToTime: switching players', {
-                from: currentActive === playerA ? 'A' : 'B',
-                to: newPlayer === playerA ? 'A' : 'B',
-                index: idx,
-                offset: offset.toFixed(2)
-            });
+                log.i('seekToTime: switching players', {
+                    from: currentActive === playerA ? 'A' : 'B',
+                    to: newPlayer === playerA ? 'A' : 'B',
+                    index: idx,
+                    offset: offset.toFixed(2)
+                });
+            } else {
+                // Same segment — just seek within current player
+                log.i('seekToTime: same segment, seeking within current player', {
+                    index: idx,
+                    offset: offset.toFixed(2)
+                });
+            }
 
             // Use playbackIntent to determine if we should play after seeking
             playSegment(idx, offset, playbackIntent);
@@ -1172,15 +1171,6 @@
         // ============================================
         function handleEnded() {
             const active = getActive();
-            const activePlayer = active;  // Store reference to avoid race conditions
-            const currentActive = getActive();  // Check again to detect state changes
-
-            // Detect if state changed during event processing
-            if (activePlayer !== currentActive) {
-                log.w('State changed during handleEnded - skipping');
-                return;
-            }
-
             const isLast = (currentIndex === segments.length - 1);
             const isLive = isLast && segments[currentIndex]?.final === false;
 
@@ -1387,6 +1377,34 @@
         // ============================================
         // Event Listeners
         // ============================================
+
+        // L7: Jump buttons via data attributes (moved from inline onclick)
+        document.querySelectorAll('.jump-btn[data-skip]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const seconds = parseInt(btn.dataset.skip);
+                console.log('[USER] Skip:', seconds > 0 ? `+${seconds}s` : `${seconds}s`);
+                skip(seconds);
+            });
+        });
+
+        // L7: Transport buttons (moved from inline onclick)
+        UI.prevBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Previous track');
+            prevTrack();
+        });
+        UI.playBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Play/Pause');
+            togglePlay();
+        });
+        UI.nextBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Next track');
+            nextTrack();
+        });
+        UI.liveBtn.addEventListener('click', () => {
+            console.log('[USER] Clicked: Go Live');
+            goLive();
+        });
+
         UI.timeline.addEventListener('input', (e) => {
             console.log('[USER] Timeline drag started');
             isDragging = true;
